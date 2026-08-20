@@ -1,16 +1,18 @@
 <template>
   <div class="register-container">
-
     <div class="register-box">
 
       <h1>Crear cuenta</h1>
-      <p class="subtitle">Registrate en el sistema de tutorías</p>
+
+      <p class="subtitle">
+        Registrate en el sistema de tutorías PROA
+      </p>
 
       <form @submit.prevent="registrarse">
 
-        <!-- Nombre -->
         <div class="input-group">
           <label for="nombre">Nombre</label>
+
           <input
             id="nombre"
             v-model="formulario.nombre"
@@ -20,9 +22,9 @@
           />
         </div>
 
-        <!-- Apellido -->
         <div class="input-group">
           <label for="apellido">Apellido</label>
+
           <input
             id="apellido"
             v-model="formulario.apellido"
@@ -32,33 +34,44 @@
           />
         </div>
 
-        <!-- Correo -->
         <div class="input-group">
-          <label for="email">Correo electrónico</label>
+          <label for="email">
+            Correo institucional
+          </label>
+
           <input
             id="email"
             v-model="formulario.email"
             type="email"
-            placeholder="ejemplo@gmail.com"
+            placeholder="ejemplo@escuelasproa.edu.ar"
             required
           />
+
+          <small>
+            Solo se permiten correos @escuelasproa.edu.ar
+          </small>
         </div>
 
-        <!-- Contraseña -->
         <div class="input-group">
-          <label for="password">Contraseña</label>
+          <label for="password">
+            Contraseña
+          </label>
+
           <input
             id="password"
             v-model="formulario.password"
             type="password"
             placeholder="Ingresá una contraseña"
+            minlength="6"
             required
           />
         </div>
 
-        <!-- Confirmar contraseña -->
         <div class="input-group">
-          <label for="confirmPassword">Confirmar contraseña</label>
+          <label for="confirmPassword">
+            Confirmar contraseña
+          </label>
+
           <input
             id="confirmPassword"
             v-model="formulario.confirmPassword"
@@ -68,9 +81,10 @@
           />
         </div>
 
-        <!-- Tipo de usuario -->
         <div class="input-group">
-          <label for="tipo">Tipo de usuario</label>
+          <label for="tipo">
+            Tipo de usuario
+          </label>
 
           <select
             id="tipo"
@@ -91,267 +105,225 @@
           </select>
         </div>
 
-        <!-- Botón -->
         <button type="submit">
           Registrarme
         </button>
 
       </form>
 
-      <!-- Login -->
       <p class="login-text">
         ¿Ya tenés una cuenta?
-        <a href="#">Iniciar sesión</a>
+
+        <button
+          type="button"
+          class="link-button"
+          @click="irAlLogin"
+        >
+          Iniciar sesión
+        </button>
       </p>
 
     </div>
-
   </div>
 </template>
 
-
 <script setup>
-
 import { reactive } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 
-// Datos del formulario
 const formulario = reactive({
-
   nombre: '',
-
   apellido: '',
-
   email: '',
-
   password: '',
-
   confirmPassword: '',
-
   tipo: ''
-
 })
 
-
-// Función para registrar
 const registrarse = () => {
+  const email = formulario.email.toLowerCase().trim()
 
-  // Comprobar que las contraseñas coincidan
-  if (formulario.password !== formulario.confirmPassword) {
-
-    alert('Las contraseñas no coinciden')
-
+  // Verificar correo PROA
+  if (!email.endsWith('@escuelasproa.edu.ar')) {
+    alert(
+      'Debés utilizar un correo institucional de Escuelas PROA.'
+    )
     return
   }
 
+  // Verificar contraseña
+  if (formulario.password.length < 6) {
+    alert(
+      'La contraseña debe tener al menos 6 caracteres.'
+    )
+    return
+  }
 
-  // Comprobar que se haya seleccionado un tipo
+  // Verificar que las contraseñas coincidan
+  if (
+    formulario.password !==
+    formulario.confirmPassword
+  ) {
+    alert(
+      'Las contraseñas no coinciden.'
+    )
+    return
+  }
+
+  // Verificar tipo de usuario
   if (!formulario.tipo) {
-
-    alert('Seleccioná si sos alumno o tutor')
-
+    alert(
+      'Seleccioná si sos alumno o tutor.'
+    )
     return
   }
 
+  // Obtener usuarios existentes
+  const usuarios = JSON.parse(
+    localStorage.getItem('usuariosPROA') || '[]'
+  )
 
-  // Mostrar los datos en la consola
-  console.log('Usuario registrado:')
+  // Verificar si el correo ya existe
+  const usuarioExiste = usuarios.some(
+    usuario => usuario.email === email
+  )
 
-  console.log('Nombre:', formulario.nombre)
+  if (usuarioExiste) {
+    alert(
+      'Ese correo ya está registrado.'
+    )
+    return
+  }
 
-  console.log('Apellido:', formulario.apellido)
+  // Crear nuevo usuario
+  const nuevoUsuario = {
+    nombre: formulario.nombre.trim(),
+    apellido: formulario.apellido.trim(),
+    email: email,
+    password: formulario.password,
+    tipo: formulario.tipo
+  }
 
-  console.log('Email:', formulario.email)
+  // Guardar usuario
+  usuarios.push(nuevoUsuario)
 
-  console.log('Tipo:', formulario.tipo)
+  localStorage.setItem(
+    'usuariosPROA',
+    JSON.stringify(usuarios)
+  )
 
+  alert(
+    '¡Registro exitoso!\n\n' +
+    'Ahora podés iniciar sesión.'
+  )
 
-  // Mensaje de registro exitoso
-  alert('¡Registro exitoso!')
-
-
-  // Limpiar formulario
-  formulario.nombre = ''
-
-  formulario.apellido = ''
-
-  formulario.email = ''
-
-  formulario.password = ''
-
-  formulario.confirmPassword = ''
-
-  formulario.tipo = ''
-
+  // Ir al Login
+  irAlLogin()
 }
 
+const irAlLogin = () => {
+  router.push('/login')
+}
 </script>
 
-
 <style scoped>
-
 .register-container {
-
   min-height: 100vh;
-
   display: flex;
-
   justify-content: center;
-
   align-items: center;
-
   background: #f2f4f7;
-
   padding: 20px;
-
 }
-
 
 .register-box {
-
   width: 100%;
-
   max-width: 430px;
-
   background: white;
-
   padding: 35px;
-
   border-radius: 15px;
-
   box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
-
 }
-
 
 h1 {
-
   text-align: center;
-
-  margin-bottom: 8px;
-
+  margin: 0 0 8px;
   color: #222;
-
 }
-
 
 .subtitle {
-
   text-align: center;
-
   color: #777;
-
   margin-bottom: 25px;
-
 }
-
 
 .input-group {
-
   display: flex;
-
   flex-direction: column;
-
   margin-bottom: 17px;
-
 }
-
 
 .input-group label {
-
   margin-bottom: 7px;
-
   font-weight: bold;
-
   color: #333;
-
 }
-
 
 .input-group input,
-
 .input-group select {
-
   padding: 12px;
-
   border: 1px solid #ccc;
-
   border-radius: 8px;
-
   font-size: 15px;
-
   outline: none;
-
+  box-sizing: border-box;
 }
-
 
 .input-group input:focus,
-
 .input-group select:focus {
-
   border-color: #4f46e5;
-
 }
 
-
-button {
-
-  width: 100%;
-
-  padding: 13px;
-
-  border: none;
-
-  border-radius: 8px;
-
-  background: #4f46e5;
-
-  color: white;
-
-  font-size: 16px;
-
-  font-weight: bold;
-
-  cursor: pointer;
-
+.input-group small {
   margin-top: 5px;
-
+  color: #777;
+  font-size: 12px;
 }
 
+button[type="submit"] {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 8px;
+  background: #4f46e5;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-button:hover {
-
+button[type="submit"]:hover {
   background: #3730a3;
-
 }
-
 
 .login-text {
-
   text-align: center;
-
   margin-top: 20px;
-
   color: #666;
-
 }
 
-
-.login-text a {
-
+.link-button {
+  border: none;
+  background: none;
   color: #4f46e5;
-
-  text-decoration: none;
-
   font-weight: bold;
-
+  cursor: pointer;
+  font-size: inherit;
 }
 
-
-.login-text a:hover {
-
+.link-button:hover {
   text-decoration: underline;
-
 }
-
 </style>
