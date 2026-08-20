@@ -44,6 +44,16 @@
 
       </form>
 
+      <!-- Recuperar contraseña -->
+      <button
+        type="button"
+        class="forgot-button"
+        @click="irRecuperar"
+      >
+        ¿Olvidaste tu contraseña?
+      </button>
+
+      <!-- Ir al registro -->
       <p class="register-text">
         ¿No tenés una cuenta?
 
@@ -74,7 +84,7 @@ const formulario = reactive({
 const iniciarSesion = () => {
   const email = formulario.email.toLowerCase().trim()
 
-  // Verificar que sea un correo institucional PROA
+  // Verificar correo institucional PROA
   if (!email.endsWith('@escuelasproa.edu.ar')) {
     alert(
       'Debés utilizar un correo institucional de Escuelas PROA.'
@@ -87,20 +97,20 @@ const iniciarSesion = () => {
     localStorage.getItem('usuariosPROA') || '[]'
   )
 
-  // Buscar el usuario
+  // Buscar usuario
   const usuario = usuarios.find(
     usuario =>
       usuario.email === email &&
       usuario.password === formulario.password
   )
 
-  // Si no existe el usuario
+  // Si no existe
   if (!usuario) {
     alert('Correo o contraseña incorrectos.')
     return
   }
 
-  // Guardar la sesión actual
+  // Guardar usuario actual
   localStorage.setItem(
     'usuarioActual',
     JSON.stringify(usuario)
@@ -110,12 +120,18 @@ const iniciarSesion = () => {
 
   console.log('Usuario conectado:', usuario)
 
-  // Ir a la página principal
+  // Ir al inicio
   router.push('/')
 }
 
+// Ir al registro
 const irAlRegistro = () => {
   router.push('/register')
+}
+
+// Ir a recuperar contraseña
+const irRecuperar = () => {
+  router.push('/recuperar')
 }
 </script>
 
@@ -190,6 +206,24 @@ button[type="submit"] {
 button[type="submit"]:hover {
   background: #3730a3;
 }
+
+/* Recuperar contraseña */
+
+.forgot-button {
+  display: block;
+  margin: 18px auto 0;
+  border: none;
+  background: none;
+  color: #4f46e5;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.forgot-button:hover {
+  text-decoration: underline;
+}
+
+/* Registro */
 
 .register-text {
   text-align: center;
