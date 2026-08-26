@@ -49,20 +49,20 @@
               Todos los cursos
             </option>
 
-            <option value="4A">
-              4° A
+            <option value="1 año">
+              1 año
             </option>
 
-            <option value="4B">
-              4° B
+            <option value="2 año">
+              2 año
             </option>
 
-            <option value="5A">
-              5° A
+            <option value="3 año">
+              3  año
             </option>
 
-            <option value="5B">
-              5° B
+            <option value="4 año">
+              4 año
             </option>
 
           </select>
@@ -214,13 +214,13 @@ export default {
 
         todos: "Todos",
 
-        "4A": "4° A",
+        "1 año": "1 año °",
 
-        "4B": "4° B",
+        "2 año": "2 año°",
 
-        "5A": "5° A",
+        "3 año": "3 año°",
 
-        "5B": "5° B"
+        "4 año": "4 año°"
 
       };
 

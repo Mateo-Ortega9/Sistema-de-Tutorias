@@ -100,7 +100,7 @@ export default {
         {
           id: 1,
           nombre: "Juan Pérez",
-          curso: "4A",
+          curso: "1 año",
           materia: "matematica",
           email: "juan@gmail.com",
           whatsapp: "5493511111111"
@@ -109,25 +109,25 @@ export default {
         {
           id: 2,
           nombre: "Ana López",
-          curso: "4A",
+          curso: "1 año",
           materia: "lengua",
           email: "ana@gmail.com",
           whatsapp: "5493512222222"
         },
 
         {
-          id: 3,
+          id: 3 ,
           nombre: "Pedro Gómez",
-          curso: "4B",
+          curso: "2 año",
           materia: "programacion",
           email: "pedro@gmail.com",
           whatsapp: "5493513333333"
         },
 
         {
-          id: 4,
+          id: 4 ,
           nombre: "Sofía Martínez",
-          curso: "4B",
+          curso: "2 año",
           materia: "matematica",
           email: "sofia@gmail.com",
           whatsapp: "5493514444444"
@@ -136,7 +136,7 @@ export default {
         {
           id: 5,
           nombre: "Lucas Fernández",
-          curso: "5A",
+          curso: "3 año",
           materia: "ingles",
           email: "lucas@gmail.com",
           whatsapp: "5493515555555"
@@ -145,7 +145,7 @@ export default {
         {
           id: 6,
           nombre: "Camila Rodríguez",
-          curso: "5A",
+          curso: "3 año",
           materia: "programacion",
           email: "camila@gmail.com",
           whatsapp: "5493516666666"
@@ -154,7 +154,7 @@ export default {
         {
           id: 7,
           nombre: "Martín González",
-          curso: "5B",
+          curso: "4 año",
           materia: "matematica",
           email: "martin@gmail.com",
           whatsapp: "5493517777777"
@@ -163,7 +163,7 @@ export default {
         {
           id: 8,
           nombre: "Valentina Díaz",
-          curso: "5B",
+          curso: "4 año",
           materia: "lengua",
           email: "valentina@gmail.com",
           whatsapp: "5493518888888"
