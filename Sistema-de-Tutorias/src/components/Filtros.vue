@@ -1,68 +1,59 @@
 <template>
-  <div class="pagina">
+  <div class="app">
 
     <!-- BARRA SUPERIOR -->
-    <header class="barra">
+    <header class="topbar">
 
-      <div>
-        <h1>Sistema de Tutorías</h1>
-        <p>Administración de estudiantes</p>
+      <div class="top-left">
+        <button class="icon-button">
+          ☰
+        </button>
+
+        <button class="icon-button">
+          🏠
+        </button>
       </div>
 
-      <button
-        class="boton-filtros"
-        @click="mostrarFiltros = !mostrarFiltros"
-      >
-        ⚙ Filtros
-      </button>
+      <div class="top-title">
+        Sistema de Tutorías
+      </div>
+
+      <div class="user">
+        👤
+      </div>
 
     </header>
 
 
-    <!-- CONTENIDO -->
-    <main class="contenido">
+    <div class="layout">
 
-      <div class="titulo">
-        <h2>Estudiantes</h2>
+      <!-- MENÚ LATERAL -->
+      <aside class="sidebar">
 
-        <p>
-          Seleccioná un curso y una materia para mostrar
-          los estudiantes correspondientes.
-        </p>
-      </div>
-
-
-      <!-- FILTROS -->
-      <section
-        v-if="mostrarFiltros"
-        class="panel-filtros"
-      >
-
-        <!-- CURSO -->
-        <div class="campo">
+        <div class="filtro">
 
           <label>Curso</label>
 
           <select v-model="cursoSeleccionado">
 
             <option value="todos">
-              Todos los cursos
+              Todos
             </option>
 
-            <option value="1 año">
-              1 año
+            <option value="1° año">
+              1° Año 
             </option>
 
-            <option value="2 año">
-              2 año
+            <option value="2° año">
+              2° Año 
             </option>
 
-            <option value="3 año">
-              3  año
+            <option value="3° año">
+              3° Año 
             </option>
 
-            <option value="4 año">
-              4 año
+            <option value="4° año">
+              4° Año 
             </option>
 
           </select>
@@ -70,15 +61,14 @@
         </div>
 
 
-        <!-- MATERIA -->
-        <div class="campo">
+        <div class="filtro">
 
           <label>Materia</label>
 
           <select v-model="materiaSeleccionada">
 
             <option value="todas">
-              Todas las materias
+              Todas
             </option>
 
             <option value="matematica">
@@ -102,62 +92,142 @@
         </div>
 
 
-        <button
-          class="limpiar"
-          @click="limpiarFiltros"
+        <!-- NAVEGACIÓN -->
+        <nav class="navegacion">
+
+          <button
+            :class="{ activo: vista === 'calendario' }"
+            @click="vista = 'calendario'"
+          >
+            📅 Calendario
+          </button>
+
+          <button
+            :class="{ activo: vista === 'estudiantes' }"
+            @click="vista = 'estudiantes'"
+          >
+            👥 Estudiantes
+          </button>
+
+        </nav>
+
+
+        <!-- REFERENCIA DE COLORES -->
+        <div class="referencia">
+
+          <div>
+            <span class="color naranja"></span>
+            Muchas personas citadas
+          </div>
+
+          <div>
+            <span class="color azul"></span>
+            Pocas personas citadas
+          </div>
+
+          <div>
+            <span class="color verde"></span>
+            No hay personas citadas
+          </div>
+
+        </div>
+
+      </aside>
+
+
+      <!-- CONTENIDO PRINCIPAL -->
+      <main class="contenido">
+
+        <!-- CALENDARIO -->
+        <section
+          v-if="vista === 'calendario'"
+          class="calendario"
         >
-          Limpiar
-        </button>
 
-      </section>
+          <h1>MARZO</h1>
 
+          <div class="tabla-calendario">
 
-      <!-- FILTROS ACTUALES -->
-      <div class="filtros-activos">
+            <div class="cabecera-calendario"></div>
 
-        <span>
-          Curso:
-          <strong>{{ nombreCurso }}</strong>
-        </span>
-
-        <span>
-          Materia:
-          <strong>{{ nombreMateria }}</strong>
-        </span>
-
-      </div>
+            <div
+              v-for="dia in dias"
+              :key="dia"
+              class="cabecera-calendario"
+            >
+              {{ dia }}
+            </div>
 
 
-      <!-- LISTA DE ESTUDIANTES -->
-      <ListasDeEstudiantes
-        :curso="cursoSeleccionado"
-        :materia="materiaSeleccionada"
-      />
+            <template
+              v-for="semana in semanas"
+              :key="semana"
+            >
+
+              <div class="semana">
+                Semana {{ semana }}
+              </div>
+
+              <div
+                v-for="dia in dias"
+                :key="dia"
+                class="celda"
+                :class="colorCelda(semana, dia)"
+              >
+              </div>
+
+            </template>
+
+          </div>
+
+        </section>
 
 
-      <!-- BOTÓN ENVIAR TUTORÍA -->
-      <div class="contenedor-enviar">
+        <!-- ESTUDIANTES -->
+        <section class="zona-estudiantes">
 
-        <button
-          class="boton-enviar"
-          @click="mostrarEnviar = true"
-        >
-          ✉ Enviar Tutoría
-        </button>
+          <div class="titulo-seccion">
 
-      </div>
+            <div>
+              <h2>Estudiantes</h2>
 
-    </main>
+              <p>
+                {{ estudiantesFiltrados.length }}
+                estudiantes encontrados
+              </p>
+            </div>
+
+            <button
+              class="boton-tutoria"
+              @click="mostrarEnviar = true"
+            >
+              ✉ Enviar Tutoría
+            </button>
+
+          </div>
 
 
-    <!-- PANEL DE ENVIAR TUTORÍA -->
+          <ListasDeEstudiantes
+            v-if="vista === 'estudiantes' || vista === 'calendario'"
+            :curso="cursoSeleccionado"
+            :materia="materiaSeleccionada"
+          />
+
+        </section>
+
+      </main>
+
+    </div>
+
+
+    <!-- PANEL DE ENVÍO -->
     <div
       v-if="mostrarEnviar"
-      class="overlay"
+      class="fondo-modal"
       @click.self="mostrarEnviar = false"
     >
 
-      <div class="panel-enviar">
+      <div class="modal">
 
         <button
           class="cerrar"
@@ -177,7 +247,6 @@
 
 
 <script>
-
 import ListasDeEstudiantes from "./ListasDeEstudiantes.vue";
 import EnviarTutoria from "./EnviarTutoria.vue";
 
@@ -191,61 +260,70 @@ export default {
   },
 
   data() {
-
     return {
-
-      mostrarFiltros: true,
-
-      mostrarEnviar: false,
 
       cursoSeleccionado: "todos",
 
-      materiaSeleccionada: "todas"
+      materiaSeleccionada: "todas",
+
+      vista: "calendario",
+
+      mostrarEnviar: false,
+
+      dias: [
+        "LUN",
+        "MAR",
+        "MIÉ",
+        "JUE",
+        "VIE"
+      ],
+
+      semanas: [1, 2, 3, 4]
 
     };
-
   },
 
   computed: {
 
-    nombreCurso() {
+    estudiantesFiltrados() {
 
-      const cursos = {
+      const estudiantes = [
 
-        todos: "Todos",
+        {
+          curso: "1° año",
+          materia: "matematica"
+        },
 
-        "1 año": "1 año °",
+        {
+          curso: "1° año",
+          materia: "lengua"
+        },
 
-        "2 año": "2 año°",
+        {
+          curso: "2° año",
+          materia: "programacion"
+        },
 
-        "3 año": "3 año°",
+        {
+          curso: "3° año",
+          materia: "ingles"
+        }
 
-        "4 año": "4 año°"
+      ];
 
-      };
+      return estudiantes.filter(estudiante => {
 
-      return cursos[this.cursoSeleccionado];
+        const curso =
+          this.cursoSeleccionado === "todos" ||
+          estudiante.curso === this.cursoSeleccionado;
 
-    },
+        const materia =
+          this.materiaSeleccionada === "todas" ||
+          estudiante.materia === this.materiaSeleccionada;
 
+        return curso && materia;
 
-    nombreMateria() {
-
-      const materias = {
-
-        todas: "Todas",
-
-        matematica: "Matemática",
-
-        lengua: "Lengua",
-
-        ingles: "Inglés",
-
-        programacion: "Programación"
-
-      };
-
-      return materias[this.materiaSeleccionada];
+      });
 
     }
 
@@ -253,229 +331,320 @@ export default {
 
   methods: {
 
-    limpiarFiltros() {
+    colorCelda(semana, dia) {
 
-      this.cursoSeleccionado = "todos";
+      if (semana === 1 && dia === "LUN") {
+        return "naranja";
+      }
 
-      this.materiaSeleccionada = "todas";
+      if (semana === 2 && dia === "VIE") {
+        return "azul";
+      }
+
+      if (semana === 4 && dia === "MAR") {
+        return "verde";
+      }
+
+      return "";
 
     }
 
   }
 
 };
-
 </script>
 
 
 <style scoped>
 
-.pagina {
+.app {
   min-height: 100vh;
-  background: #f4f6f8;
-  color: #20242a;
+  background: #f7f8fa;
 }
 
 
-/* BARRA */
+/* BARRA SUPERIOR */
 
-.barra {
-  height: 75px;
-
-  padding: 0 35px;
-
+.topbar {
+  height: 70px;
   background: white;
-
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #222;
 
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
+
+  padding: 0 25px;
 }
 
-.barra h1 {
-  margin: 0;
-
-  font-size: 23px;
+.top-left {
+  display: flex;
+  gap: 12px;
 }
 
-.barra p {
-  margin: 5px 0 0;
+.icon-button {
+  border: 1px solid #222;
+  background: white;
 
-  color: #777;
+  width: 40px;
+  height: 40px;
+
+  border-radius: 7px;
+
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.top-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.user {
+  border: 1px solid #222;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* ESTRUCTURA */
+
+.layout {
+  display: flex;
+  min-height: calc(100vh - 70px);
+}
+
+
+/* SIDEBAR */
+
+.sidebar {
+  width: 250px;
+  background: white;
+  border-right: 1px solid #222;
+
+  padding: 30px 22px;
+
+  flex-shrink: 0;
+}
+
+.filtro {
+  margin-bottom: 25px;
+}
+
+.filtro label {
+  display: block;
+
+  font-size: 18px;
+  margin-bottom: 9px;
+}
+
+.filtro select {
+  width: 100%;
+
+  padding: 12px;
+
+  border: 1px solid #222;
+  border-radius: 5px;
+
+  background: white;
 
   font-size: 14px;
 }
 
 
-/* BOTÓN FILTROS */
+/* NAVEGACIÓN */
 
-.boton-filtros {
-  padding: 11px 18px;
+.navegacion {
+  margin-top: 35px;
 
-  border: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+}
 
-  border-radius: 8px;
+.navegacion button {
+  border: none;
 
   background: white;
+
+  text-align: left;
+
+  padding: 14px 10px;
+
+  font-size: 16px;
 
   cursor: pointer;
 
-  font-size: 14px;
+  border-radius: 6px;
 }
 
-.boton-filtros:hover {
-  background: #f1f1f1;
+.navegacion button:hover,
+.navegacion .activo {
+  background: #e9eff8;
+}
+
+
+/* REFERENCIA */
+
+.referencia {
+  margin-top: 120px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 15px;
+
+  font-size: 12px;
+}
+
+.referencia div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color {
+  width: 18px;
+  height: 18px;
+
+  display: inline-block;
+
+  border: 1px solid #555;
+}
+
+.color.naranja {
+  background: #ffd9bd;
+}
+
+.color.azul {
+  background: #ccd9f5;
+}
+
+.color.verde {
+  background: #c9e9d0;
 }
 
 
 /* CONTENIDO */
 
 .contenido {
-  padding: 30px 35px;
+  flex: 1;
+
+  padding: 30px;
+
+  overflow-x: auto;
 }
 
-.titulo h2 {
+
+/* CALENDARIO */
+
+.calendario h1 {
+  text-align: center;
+
+  font-size: 24px;
+
+  margin: 0 0 20px;
+}
+
+.tabla-calendario {
+  display: grid;
+
+  grid-template-columns:
+    120px repeat(5, minmax(100px, 1fr));
+
+  border: 1px solid #222;
+
+  min-width: 700px;
+}
+
+.cabecera-calendario,
+.semana,
+.celda {
+  min-height: 55px;
+
+  border-right: 1px solid #222;
+  border-bottom: 1px solid #222;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.semana {
+  font-size: 13px;
+}
+
+.celda.naranja {
+  background: #ffd9bd;
+}
+
+.celda.azul {
+  background: #ccd9f5;
+}
+
+.celda.verde {
+  background: #c9e9d0;
+}
+
+
+/* ESTUDIANTES */
+
+.zona-estudiantes {
+  margin-top: 35px;
+}
+
+.titulo-seccion {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 15px;
+}
+
+.titulo-seccion h2 {
   margin: 0;
 
-  font-size: 28px;
+  font-size: 25px;
 }
 
-.titulo p {
-  margin-top: 7px;
+.titulo-seccion p {
+  margin: 5px 0 0;
 
   color: #777;
 }
 
 
-/* FILTROS */
+/* BOTÓN */
 
-.panel-filtros {
-  margin-top: 25px;
-
-  padding: 20px;
-
-  background: white;
-
-  border: 1px solid #ddd;
-
-  border-radius: 12px;
-
-  display: flex;
-
-  align-items: end;
-
-  gap: 20px;
-}
-
-.campo {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 7px;
-}
-
-.campo label {
-  font-size: 13px;
-
-  font-weight: bold;
-
-  color: #555;
-}
-
-.campo select {
-  width: 220px;
-
-  padding: 11px;
-
-  border: 1px solid #ccc;
-
-  border-radius: 8px;
-
-  background: white;
-
-  cursor: pointer;
-}
-
-
-/* LIMPIAR */
-
-.limpiar {
-  padding: 11px 18px;
-
-  border: 1px solid #ccc;
-
-  border-radius: 8px;
-
-  background: white;
-
-  cursor: pointer;
-}
-
-
-/* FILTROS ACTIVOS */
-
-.filtros-activos {
-  display: flex;
-
-  gap: 10px;
-
-  margin-top: 20px;
-}
-
-.filtros-activos span {
-  padding: 8px 13px;
-
-  background: white;
-
-  border: 1px solid #ddd;
-
-  border-radius: 8px;
-
-  color: #666;
-
-  font-size: 13px;
-}
-
-
-/* ENVIAR */
-
-.contenedor-enviar {
-  display: flex;
-
-  justify-content: flex-end;
-
-  margin-top: 20px;
-}
-
-.boton-enviar {
+.boton-tutoria {
   padding: 12px 20px;
 
-  border: none;
+  border: 1px solid #222;
 
-  border-radius: 8px;
+  background: #dce7f8;
 
-  background: #222;
-
-  color: white;
-
-  font-weight: bold;
+  border-radius: 6px;
 
   cursor: pointer;
+
+  font-weight: bold;
 }
 
 
 /* MODAL */
 
-.overlay {
+.fondo-modal {
   position: fixed;
 
   inset: 0;
 
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.35);
 
   display: flex;
 
@@ -486,12 +655,11 @@ export default {
   z-index: 100;
 }
 
-.panel-enviar {
+.modal {
   position: relative;
 
-  width: 850px;
-
-  max-width: 95%;
+  width: 600px;
+  max-width: 90%;
 
   max-height: 90vh;
 
@@ -499,7 +667,9 @@ export default {
 
   background: white;
 
-  border-radius: 15px;
+  border: 1px solid #222;
+
+  border-radius: 10px;
 
   padding: 25px;
 }
@@ -507,19 +677,14 @@ export default {
 .cerrar {
   position: absolute;
 
-  top: 12px;
-
-  right: 12px;
-
-  width: 35px;
-
-  height: 35px;
+  right: 15px;
+  top: 15px;
 
   border: none;
 
-  border-radius: 50%;
+  background: transparent;
 
-  background: #eee;
+  font-size: 20px;
 
   cursor: pointer;
 }

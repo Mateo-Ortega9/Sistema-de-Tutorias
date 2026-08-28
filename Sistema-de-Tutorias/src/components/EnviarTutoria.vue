@@ -2,239 +2,174 @@
 
   <div class="enviar">
 
-    <h2>Enviar Tutoría</h2>
-
-    <p>
-      Seleccioná los estudiantes a los que querés enviar
-      la tutoría.
-    </p>
-
-
-    <div class="mensaje">
-
-      <label>Mensaje de la tutoría</label>
-
-      <textarea
-        v-model="mensaje"
-        rows="5"
-        placeholder="Escribí el mensaje..."
-      ></textarea>
-
+    <div class="titulo">
+      <h2>Enviar tutoría</h2>
+      <p>Seleccioná un estudiante.</p>
     </div>
 
-
-    <button
-      class="boton"
-      @click="confirmar"
-    >
-      Enviar tutoría
-    </button>
-
-
     <div
-      v-if="mostrarConfirmacion"
-      class="confirmacion"
+      v-for="estudiante in estudiantes"
+      :key="estudiante.id"
+      class="estudiante"
+      :class="{ seleccionado: seleccionado === estudiante.id }"
+      @click="seleccionar(estudiante.id)"
     >
 
-      <div class="caja">
+      <div>
+        <strong>{{ estudiante.nombre }}</strong>
 
-        <h3>¿Estás seguro?</h3>
+        <small>
+          {{ estudiante.curso }} · {{ estudiante.materia }}
+        </small>
+      </div>
 
-        <p>
-          Se enviará la tutoría a los estudiantes seleccionados.
-        </p>
+      <div
+        v-if="seleccionado === estudiante.id"
+        class="acciones"
+      >
 
-        <div class="acciones">
+        <a
+          :href="'mailto:' + estudiante.email"
+          @click.stop
+        >
+          📧 Mail
+        </a>
 
-          <button
-            @click="mostrarConfirmacion = false"
-          >
-            Cancelar
-          </button>
-
-          <button
-            class="confirmar"
-            @click="enviar"
-          >
-            Confirmar envío
-          </button>
-
-        </div>
+        <a
+          :href="'https://wa.me/' + estudiante.whatsapp"
+          target="_blank"
+          @click.stop
+        >
+          💬 WhatsApp
+        </a>
 
       </div>
 
     </div>
 
+    <p v-if="estudiantes.length === 0" class="vacio">
+      No hay estudiantes para el filtro seleccionado.
+    </p>
+
   </div>
 
 </template>
 
-
 <script>
-
 export default {
 
   name: "EnviarTutoria",
 
-  data() {
+  props: {
 
-    return {
-
-      mensaje:
-        "Hola, te contacto para informarte sobre una tutoría.",
-
-      mostrarConfirmacion: false
-
-    };
+    estudiantes: {
+      type: Array,
+      default: () => []
+    }
 
   },
 
+  data() {
+
+    return {
+      seleccionado: null
+    }
+
+  },
+
+  watch: {
+
+    estudiantes() {
+      this.seleccionado = null;
+    }
+
+  },
 
   methods: {
 
-    confirmar() {
+    seleccionar(id) {
 
-      this.mostrarConfirmacion = true;
-
-    },
-
-
-    enviar() {
-
-      this.mostrarConfirmacion = false;
-
-      alert("Tutoría preparada para enviar.");
+      if (this.seleccionado === id) {
+        this.seleccionado = null;
+      } else {
+        this.seleccionado = id;
+      }
 
     }
 
   }
 
-};
-
+}
 </script>
-
 
 <style scoped>
 
 .enviar {
-  padding: 20px;
-}
-
-.enviar h2 {
-  margin-top: 0;
-}
-
-.enviar p {
-  color: #666;
-}
-
-
-.mensaje {
-  margin-top: 20px;
-
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 8px;
-}
-
-.mensaje label {
-  font-weight: bold;
-
-  font-size: 14px;
-}
-
-textarea {
-  width: 100%;
-
-  padding: 12px;
-
+  width: 90%;
+  max-width: 900px;
+  margin: 25px auto;
+  background: white;
   border: 1px solid #ccc;
-
   border-radius: 8px;
-
-  resize: vertical;
-
-  font-family: Arial, sans-serif;
 }
 
+.titulo {
+  padding: 18px 20px;
+  border-bottom: 1px solid #ddd;
+}
 
-.boton {
-  margin-top: 15px;
+.titulo h2 {
+  margin: 0;
+}
 
-  padding: 11px 18px;
+.titulo p {
+  margin-bottom: 0;
+  color: #777;
+}
 
-  border: none;
-
-  border-radius: 8px;
-
-  background: #222;
-
-  color: white;
-
+.estudiante {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
   cursor: pointer;
 }
 
-
-/* CONFIRMACIÓN */
-
-.confirmacion {
-  position: fixed;
-
-  inset: 0;
-
-  background: rgba(0, 0, 0, 0.5);
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
+.estudiante:hover {
+  background: #f7f7f7;
 }
 
-
-.caja {
-  width: 400px;
-
-  max-width: 90%;
-
-  padding: 25px;
-
-  background: white;
-
-  border-radius: 12px;
+.estudiante.seleccionado {
+  background: #f1f1f1;
 }
 
+.estudiante strong {
+  display: block;
+}
+
+.estudiante small {
+  color: #777;
+}
 
 .acciones {
   display: flex;
-
-  justify-content: flex-end;
-
   gap: 10px;
-
-  margin-top: 20px;
 }
 
-.acciones button {
-  padding: 9px 15px;
-
-  border: 1px solid #ccc;
-
-  border-radius: 7px;
-
+.acciones a {
+  padding: 8px 12px;
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  text-decoration: none;
+  color: #222;
   background: white;
-
-  cursor: pointer;
 }
 
-.acciones .confirmar {
-  background: #222;
-
-  color: white;
-
-  border: none;
+.vacio {
+  padding: 25px;
+  text-align: center;
+  color: #777;
 }
 
 </style>
