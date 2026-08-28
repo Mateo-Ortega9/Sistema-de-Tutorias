@@ -81,12 +81,6 @@ function handleLogout() {
 </template>
 
 <style>
-/* Estilos globales sin "scoped": tipografías del sistema de diseño.
-   Se cargan por @import para que este archivo funcione como reemplazo directo
-   sin tener que tocar index.html. Si preferís mejor rendimiento, podés mover
-   este <link> a index.html en su lugar. */
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
-
 * {
   box-sizing: border-box;
 }
@@ -94,33 +88,43 @@ html,
 body,
 #app {
   height: 100%;
+  width: 100%;
   margin: 0;
 }
 body {
   font-family: 'Inter', system-ui, sans-serif;
+  display: block;
+}
+#app {
+  max-width: none;
+  padding: 0;
+  display: block;
 }
 </style>
 
 <style scoped>
 .app-shell {
   /* Paleta */
-  --color-ink: #131c2e;
-  --color-ink-soft: #1d2a42;
-  --color-ink-line: #2a3956;
-  --color-paper: #f6f4ef;
+  --color-ink: #123c4b;
+  --color-ink-soft: #1e3f63;
+  --color-ink-line: #2c5878;
+  --color-paper: #eff3dc;
   --color-paper-raised: #ffffff;
-  --color-text: #1c2436;
-  --color-text-muted: #6b7280;
-  --color-accent: #c98a3e;
-  --color-accent-deep: #a86b28;
-  --color-accent-soft: #f1e2ce;
-  --color-line: #e4e0d6;
-  --color-success: #3f8f5f;
-  --color-success-bg: #e3f2e8;
-  --color-warning: #b9852f;
-  --color-warning-bg: #faf0dd;
-  --color-neutral: #6b7280;
-  --color-neutral-bg: #eceae4;
+  --color-text: #16303d;
+  --color-text-muted: #5d7280;
+  --color-accent: #45e08c;
+  --color-accent-deep: #1f8f5c;
+  --color-accent-soft: #dcf7e7;
+  --color-teal: #4ecdc4;
+  --color-teal-deep: #1f8079;
+  --color-teal-soft: #dbf5f2;
+  --color-line: #dee3cd;
+  --color-success: #1f8f5c;
+  --color-success-bg: #dcf7e7;
+  --color-warning: #1f8079;
+  --color-warning-bg: #dbf5f2;
+  --color-neutral: #5d7280;
+  --color-neutral-bg: #e6e8da;
 
   /* Tipografía */
   --font-display: 'Fraunces', Georgia, serif;
@@ -213,7 +217,7 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--color-accent);
+  background: var(--color-teal);
   color: var(--color-ink);
   font-family: var(--font-mono);
   font-weight: 600;
