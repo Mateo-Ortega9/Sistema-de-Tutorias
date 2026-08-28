@@ -1,19 +1,48 @@
 <template>
-  <div class="recover-container">
-    <div class="recover-box">
+  <div class="register-container">
+    <div class="register-box">
 
-      <h1>Recuperar contraseña</h1>
+      <div class="logo-circle">
+        P
+      </div>
+
+      <h1>Crear cuenta</h1>
 
       <p class="subtitle">
-        Ingresá tu correo institucional PROA
+        Registrate en el sistema de tutorías PROA
       </p>
 
-      <!-- Buscar usuario -->
-      <form
-        v-if="!usuarioEncontrado"
-        @submit.prevent="buscarUsuario"
-      >
+      <form @submit.prevent="registrarse">
 
+        <!-- NOMBRE -->
+        <div class="input-group">
+          <label for="nombre">Nombre</label>
+
+          <input
+            id="nombre"
+            v-model="formulario.nombre"
+            type="text"
+            placeholder="Ingresá tu nombre"
+            autocomplete="given-name"
+            required
+          />
+        </div>
+
+        <!-- APELLIDO -->
+        <div class="input-group">
+          <label for="apellido">Apellido</label>
+
+          <input
+            id="apellido"
+            v-model="formulario.apellido"
+            type="text"
+            placeholder="Ingresá tu apellido"
+            autocomplete="family-name"
+            required
+          />
+        </div>
+
+        <!-- EMAIL -->
         <div class="input-group">
           <label for="email">
             Correo institucional
@@ -21,120 +50,155 @@
 
           <input
             id="email"
-            v-model="email"
+            v-model="formulario.email"
             type="email"
             placeholder="ejemplo@escuelasproa.edu.ar"
+            autocomplete="email"
             required
           />
+
+          <small>
+            Solo se permiten correos @escuelasproa.edu.ar
+          </small>
         </div>
 
-        <button type="submit">
-          Continuar
-        </button>
-
-      </form>
-
-      <!-- Cambiar contraseña -->
-      <form
-        v-else
-        @submit.prevent="cambiarPassword"
-      >
-
+        <!-- CONTRASEÑA -->
         <div class="input-group">
           <label for="password">
-            Nueva contraseña
+            Contraseña
           </label>
 
           <input
             id="password"
-            v-model="nuevaPassword"
+            v-model="formulario.password"
             type="password"
-            placeholder="Ingresá una nueva contraseña"
+            placeholder="Ingresá una contraseña"
             minlength="6"
+            autocomplete="new-password"
             required
           />
+
+          <small>
+            Mínimo 6 caracteres.
+          </small>
         </div>
 
+        <!-- CONFIRMAR CONTRASEÑA -->
         <div class="input-group">
-          <label for="confirmar">
-            Confirmar nueva contraseña
+          <label for="confirmPassword">
+            Confirmar contraseña
           </label>
 
           <input
-            id="confirmar"
-            v-model="confirmarPassword"
+            id="confirmPassword"
+            v-model="formulario.confirmPassword"
             type="password"
-            placeholder="Repetí la nueva contraseña"
-            minlength="6"
+            placeholder="Repetí tu contraseña"
+            autocomplete="new-password"
             required
           />
         </div>
 
-        <button type="submit">
-          Cambiar contraseña
+        <!-- TIPO DE USUARIO -->
+        <div class="input-group">
+          <label for="tipo">
+            Tipo de usuario
+          </label>
+
+          <select
+            id="tipo"
+            v-model="formulario.tipo"
+            required
+          >
+            <option value="" disabled>
+              Seleccioná una opción
+            </option>
+
+            <option value="alumno">
+              Alumno
+            </option>
+
+            <option value="tutor">
+              Tutor
+            </option>
+          </select>
+        </div>
+
+        <!-- BOTÓN -->
+        <button
+          type="submit"
+          class="register-button"
+        >
+          Crear cuenta
         </button>
 
       </form>
 
-      <button
-        type="button"
-        class="link-button"
-        @click="volverLogin"
-      >
-        Volver al inicio de sesión
-      </button>
+      <!-- LOGIN -->
+      <p class="login-text">
+        ¿Ya tenés una cuenta?
+
+        <button
+          type="button"
+          class="link-button"
+          @click="irAlLogin"
+        >
+          Iniciar sesión
+        </button>
+      </p>
 
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-const email = ref('')
-const nuevaPassword = ref('')
-const confirmarPassword = ref('')
-const usuarioEncontrado = ref(false)
+const formulario = reactive({
+  nombre: '',
+  apellido: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  tipo: ''
+})
 
-const buscarUsuario = () => {
-  const correo = email.value.toLowerCase().trim()
+const registrarse = () => {
 
-  // Verificar correo PROA
-  if (!correo.endsWith('@escuelasproa.edu.ar')) {
+  // Limpiar datos
+  const nombre = formulario.nombre.trim()
+  const apellido = formulario.apellido.trim()
+  const email = formulario.email.trim().toLowerCase()
+  const password = formulario.password
+  const confirmPassword = formulario.confirmPassword
+  const tipo = formulario.tipo
+
+  // Verificar nombre
+  if (!nombre) {
+    alert('Ingresá tu nombre.')
+    return
+  }
+
+  // Verificar apellido
+  if (!apellido) {
+    alert('Ingresá tu apellido.')
+    return
+  }
+
+  // Verificar correo institucional
+  if (!email.endsWith('@escuelasproa.edu.ar')) {
     alert(
-      'Debés utilizar un correo institucional de Escuelas PROA.'
+      'Debés utilizar un correo institucional de Escuelas PROA.\n\n' +
+      'Ejemplo: alumno@escuelasproa.edu.ar'
     )
     return
   }
 
-  // Obtener usuarios
-  const usuarios = JSON.parse(
-    localStorage.getItem('usuariosPROA') || '[]'
-  )
-
-  // Buscar usuario
-  const usuario = usuarios.find(
-    usuario => usuario.email === correo
-  )
-
-  if (!usuario) {
-    alert(
-      'No encontramos una cuenta registrada con ese correo.'
-    )
-    return
-  }
-
-  email.value = correo
-  usuarioEncontrado.value = true
-}
-
-const cambiarPassword = () => {
-
-  // Verificar longitud
-  if (nuevaPassword.value.length < 6) {
+  // Verificar contraseña
+  if (password.length < 6) {
     alert(
       'La contraseña debe tener al menos 6 caracteres.'
     )
@@ -142,136 +206,307 @@ const cambiarPassword = () => {
   }
 
   // Verificar contraseñas
-  if (
-    nuevaPassword.value !==
-    confirmarPassword.value
-  ) {
+  if (password !== confirmPassword) {
     alert(
       'Las contraseñas no coinciden.'
     )
     return
   }
 
-  // Obtener usuarios
+  // Verificar tipo de usuario
+  if (!tipo) {
+    alert(
+      'Seleccioná si sos alumno o tutor.'
+    )
+    return
+  }
+
+  // Obtener usuarios guardados
   const usuarios = JSON.parse(
     localStorage.getItem('usuariosPROA') || '[]'
   )
 
-  // Buscar usuario
-  const usuario = usuarios.find(
-    usuario => usuario.email === email.value
+  // Verificar si el correo ya existe
+  const usuarioExiste = usuarios.some(
+    usuario => usuario.email === email
   )
 
-  if (!usuario) {
-    alert('No se encontró el usuario.')
+  if (usuarioExiste) {
+    alert(
+      'Ese correo ya está registrado.'
+    )
     return
   }
 
-  // Cambiar contraseña
-  usuario.password = nuevaPassword.value
+  // Crear nuevo usuario
+  const nuevoUsuario = {
+    id: Date.now(),
+    nombre: nombre,
+    apellido: apellido,
+    email: email,
+    password: password,
+    tipo: tipo
+  }
 
-  // Guardar usuarios actualizados
+  // Guardar usuario
+  usuarios.push(nuevoUsuario)
+
   localStorage.setItem(
     'usuariosPROA',
     JSON.stringify(usuarios)
   )
 
+  // Mensaje
   alert(
-    '¡Contraseña cambiada correctamente!'
+    '¡Registro exitoso! 🎉\n\n' +
+    'Tu cuenta fue creada correctamente.\n\n' +
+    'Ahora podés iniciar sesión.'
   )
 
-  // Volver al Login
+  // Ir al login
   router.push('/login')
 }
 
-const volverLogin = () => {
+const irAlLogin = () => {
   router.push('/login')
 }
 </script>
 
 <style scoped>
-.recover-container {
+
+* {
+  box-sizing: border-box;
+}
+
+.register-container {
   min-height: 100vh;
+
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f2f4f7;
-  padding: 20px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #eef2ff 0%,
+      #f8fafc 50%,
+      #e0e7ff 100%
+    );
+
+  padding: 25px;
 }
 
-.recover-box {
+.register-box {
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
+
   background: white;
-  padding: 35px;
-  border-radius: 15px;
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+
+  padding: 38px;
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.12);
+
+  border: 1px solid #e5e7eb;
+}
+
+.logo-circle {
+  width: 60px;
+  height: 60px;
+
+  margin: 0 auto 15px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 50%;
+
+  background: linear-gradient(
+    135deg,
+    #4f46e5,
+    #6366f1
+  );
+
+  color: white;
+
+  font-size: 28px;
+  font-weight: 800;
+
+  box-shadow:
+    0 8px 20px rgba(79, 70, 229, 0.3);
 }
 
 h1 {
   text-align: center;
-  margin: 0 0 10px;
-  color: #222;
+
+  margin: 0 0 8px;
+
+  color: #111827;
+
+  font-size: 30px;
 }
 
 .subtitle {
   text-align: center;
-  color: #777;
-  margin-bottom: 30px;
+
+  color: #6b7280;
+
+  margin: 0 0 28px;
+
+  font-size: 15px;
+
+  line-height: 1.5;
 }
 
 .input-group {
   display: flex;
+
   flex-direction: column;
-  margin-bottom: 20px;
+
+  margin-bottom: 18px;
 }
 
 .input-group label {
   margin-bottom: 7px;
-  font-weight: bold;
-  color: #333;
+
+  font-weight: 700;
+
+  color: #374151;
+
+  font-size: 14px;
 }
 
-.input-group input {
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 15px;
-  outline: none;
-  box-sizing: border-box;
-}
-
-.input-group input:focus {
-  border-color: #4f46e5;
-}
-
-button[type="submit"] {
+.input-group input,
+.input-group select {
   width: 100%;
-  padding: 13px;
-  border: none;
-  border-radius: 8px;
-  background: #4f46e5;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
+
+  padding: 13px 14px;
+
+  border: 1px solid #d1d5db;
+
+  border-radius: 10px;
+
+  background: #fff;
+
+  color: #111827;
+
+  font-size: 15px;
+
+  outline: none;
+
+  transition: 0.2s;
 }
 
-button[type="submit"]:hover {
-  background: #3730a3;
+.input-group input::placeholder {
+  color: #9ca3af;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  border-color: #4f46e5;
+
+  box-shadow:
+    0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.input-group small {
+  margin-top: 6px;
+
+  color: #6b7280;
+
+  font-size: 12px;
+}
+
+.register-button {
+  width: 100%;
+
+  padding: 14px;
+
+  margin-top: 5px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: linear-gradient(
+    135deg,
+    #4f46e5,
+    #6366f1
+  );
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+
+  box-shadow:
+    0 7px 18px rgba(79, 70, 229, 0.25);
+}
+
+.register-button:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 10px 22px rgba(79, 70, 229, 0.35);
+}
+
+.register-button:active {
+  transform: translateY(0);
+}
+
+.login-text {
+  text-align: center;
+
+  margin: 23px 0 0;
+
+  color: #6b7280;
+
+  font-size: 14px;
 }
 
 .link-button {
-  display: block;
-  margin: 20px auto 0;
   border: none;
+
   background: none;
+
   color: #4f46e5;
+
+  font-weight: 700;
+
   cursor: pointer;
-  font-size: 14px;
+
+  font-size: inherit;
+
+  padding: 0;
+
+  margin-left: 4px;
 }
 
 .link-button:hover {
   text-decoration: underline;
 }
+
+@media (max-width: 500px) {
+
+  .register-container {
+    padding: 15px;
+  }
+
+  .register-box {
+    padding: 28px 22px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+}
+
 </style>
