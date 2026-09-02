@@ -114,12 +114,12 @@
               Seleccioná una opción
             </option>
 
-            <option value="alumno">
-              Alumno
+            <option value="administrador">
+              administrador
             </option>
 
-            <option value="tutor">
-              Tutor
+            <option value="profesor">
+              profesor
             </option>
           </select>
         </div>

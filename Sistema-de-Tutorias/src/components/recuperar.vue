@@ -1,276 +1,216 @@
 <template>
-  <div class="register-container">
-    <div class="register-box">
+  <div class="recuperar-container">
 
-      <div class="logo-circle">
-        P
+    <div class="recuperar-box">
+
+      <div class="logo">
+        🔐
       </div>
 
-      <h1>Crear cuenta</h1>
+      <h1>Recuperar contraseña</h1>
 
-      <p class="subtitle">
-        Registrate en el sistema de tutorías PROA
+      <p class="descripcion">
+        Recuperá el acceso a tu cuenta de PROA.
       </p>
 
-      <form @submit.prevent="registrarse">
+      <form @submit.prevent="recuperar">
 
-        <!-- NOMBRE -->
-        <div class="input-group">
-          <label for="nombre">Nombre</label>
+        <!-- TIPO DE USUARIO -->
+        <div class="campo">
 
-          <input
-            id="nombre"
-            v-model="formulario.nombre"
-            type="text"
-            placeholder="Ingresá tu nombre"
-            autocomplete="given-name"
-            required
-          />
+          <label>
+            Tipo de usuario
+          </label>
+
+          <select v-model="tipo" required>
+
+            <option value="" disabled>
+              Seleccioná una opción
+            </option>
+
+            <option value="profesor">
+              Profesor
+            </option>
+
+            <option value="administrador">
+              Administración
+            </option>
+
+          </select>
+
         </div>
 
-        <!-- APELLIDO -->
-        <div class="input-group">
-          <label for="apellido">Apellido</label>
 
-          <input
-            id="apellido"
-            v-model="formulario.apellido"
-            type="text"
-            placeholder="Ingresá tu apellido"
-            autocomplete="family-name"
-            required
-          />
-        </div>
+        <!-- CORREO -->
+        <div class="campo">
 
-        <!-- EMAIL -->
-        <div class="input-group">
           <label for="email">
             Correo institucional
           </label>
 
           <input
             id="email"
-            v-model="formulario.email"
+            v-model="email"
             type="email"
             placeholder="ejemplo@escuelasproa.edu.ar"
-            autocomplete="email"
             required
           />
 
-          <small>
-            Solo se permiten correos @escuelasproa.edu.ar
-          </small>
         </div>
 
-        <!-- CONTRASEÑA -->
-        <div class="input-group">
-          <label for="password">
-            Contraseña
-          </label>
-
-          <input
-            id="password"
-            v-model="formulario.password"
-            type="password"
-            placeholder="Ingresá una contraseña"
-            minlength="6"
-            autocomplete="new-password"
-            required
-          />
-
-          <small>
-            Mínimo 6 caracteres.
-          </small>
-        </div>
-
-        <!-- CONFIRMAR CONTRASEÑA -->
-        <div class="input-group">
-          <label for="confirmPassword">
-            Confirmar contraseña
-          </label>
-
-          <input
-            id="confirmPassword"
-            v-model="formulario.confirmPassword"
-            type="password"
-            placeholder="Repetí tu contraseña"
-            autocomplete="new-password"
-            required
-          />
-        </div>
-
-        <!-- TIPO DE USUARIO -->
-        <div class="input-group">
-          <label for="tipo">
-            Tipo de usuario
-          </label>
-
-          <select
-            id="tipo"
-            v-model="formulario.tipo"
-            required
-          >
-            <option value="" disabled>
-              Seleccioná una opción
-            </option>
-
-            <option value="alumno">
-              Alumno
-            </option>
-
-            <option value="tutor">
-              Tutor
-            </option>
-          </select>
-        </div>
 
         <!-- BOTÓN -->
         <button
           type="submit"
-          class="register-button"
+          class="boton"
         >
-          Crear cuenta
+          Recuperar contraseña
         </button>
 
       </form>
 
-      <!-- LOGIN -->
-      <p class="login-text">
-        ¿Ya tenés una cuenta?
 
-        <button
-          type="button"
-          class="link-button"
-          @click="irAlLogin"
-        >
-          Iniciar sesión
-        </button>
-      </p>
+      <!-- VOLVER -->
+      <button
+        type="button"
+        class="volver"
+        @click="volver"
+      >
+        ← Volver al inicio de sesión
+      </button>
 
     </div>
+
   </div>
 </template>
 
+
 <script setup>
-import { reactive } from 'vue'
+
+import { ref } from 'vue'
+
 import { useRouter } from 'vue-router'
+
 
 const router = useRouter()
 
-const formulario = reactive({
-  nombre: '',
-  apellido: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-  tipo: ''
-})
 
-const registrarse = () => {
+const email = ref('')
 
-  // Limpiar datos
-  const nombre = formulario.nombre.trim()
-  const apellido = formulario.apellido.trim()
-  const email = formulario.email.trim().toLowerCase()
-  const password = formulario.password
-  const confirmPassword = formulario.confirmPassword
-  const tipo = formulario.tipo
+const tipo = ref('')
 
-  // Verificar nombre
-  if (!nombre) {
-    alert('Ingresá tu nombre.')
-    return
-  }
 
-  // Verificar apellido
-  if (!apellido) {
-    alert('Ingresá tu apellido.')
-    return
-  }
+const recuperar = () => {
 
-  // Verificar correo institucional
-  if (!email.endsWith('@escuelasproa.edu.ar')) {
+  const correo = email.value
+    .trim()
+    .toLowerCase()
+
+
+  // Verificar correo
+  if (!correo.endsWith('@escuelasproa.edu.ar')) {
+
     alert(
-      'Debés utilizar un correo institucional de Escuelas PROA.\n\n' +
-      'Ejemplo: alumno@escuelasproa.edu.ar'
+      'Debés utilizar un correo institucional de Escuelas PROA.'
     )
+
     return
   }
 
-  // Verificar contraseña
-  if (password.length < 6) {
+
+  // Verificar tipo
+  if (!tipo.value) {
+
     alert(
-      'La contraseña debe tener al menos 6 caracteres.'
+      'Seleccioná Profesor o Administración.'
     )
+
     return
   }
 
-  // Verificar contraseñas
-  if (password !== confirmPassword) {
-    alert(
-      'Las contraseñas no coinciden.'
-    )
-    return
-  }
 
-  // Verificar tipo de usuario
-  if (!tipo) {
-    alert(
-      'Seleccioná si sos alumno o tutor.'
-    )
-    return
-  }
-
-  // Obtener usuarios guardados
+  // Obtener usuarios
   const usuarios = JSON.parse(
     localStorage.getItem('usuariosPROA') || '[]'
   )
 
-  // Verificar si el correo ya existe
-  const usuarioExiste = usuarios.some(
-    usuario => usuario.email === email
+
+  // Buscar usuario
+  const usuario = usuarios.find(
+
+    usuario =>
+
+      usuario.email === correo &&
+
+      usuario.tipo === tipo.value
+
   )
 
-  if (usuarioExiste) {
+
+  if (!usuario) {
+
     alert(
-      'Ese correo ya está registrado.'
+      'No encontramos una cuenta con ese correo y tipo de usuario.'
     )
+
     return
+
   }
 
-  // Crear nuevo usuario
-  const nuevoUsuario = {
-    id: Date.now(),
-    nombre: nombre,
-    apellido: apellido,
-    email: email,
-    password: password,
-    tipo: tipo
+
+  // Pedir nueva contraseña
+  const nuevaPassword = prompt(
+    'Ingresá tu nueva contraseña:'
+  )
+
+
+  if (nuevaPassword === null) {
+
+    return
+
   }
 
-  // Guardar usuario
-  usuarios.push(nuevoUsuario)
 
+  if (nuevaPassword.length < 6) {
+
+    alert(
+      'La contraseña debe tener al menos 6 caracteres.'
+    )
+
+    return
+
+  }
+
+
+  // Actualizar contraseña
+  usuario.password = nuevaPassword
+
+
+  // Guardar cambios
   localStorage.setItem(
     'usuariosPROA',
     JSON.stringify(usuarios)
   )
 
-  // Mensaje
+
   alert(
-    '¡Registro exitoso! 🎉\n\n' +
-    'Tu cuenta fue creada correctamente.\n\n' +
-    'Ahora podés iniciar sesión.'
+    '¡Contraseña cambiada correctamente!'
   )
 
-  // Ir al login
+
   router.push('/login')
+
 }
 
-const irAlLogin = () => {
+
+const volver = () => {
+
   router.push('/login')
+
 }
+
 </script>
+
 
 <style scoped>
 
@@ -278,118 +218,143 @@ const irAlLogin = () => {
   box-sizing: border-box;
 }
 
-.register-container {
+
+.recuperar-container {
+
   min-height: 100vh;
 
   display: flex;
+
   justify-content: center;
+
   align-items: center;
 
+  padding: 20px;
+
   background:
+
     linear-gradient(
+
       135deg,
-      #eef2ff 0%,
-      #f8fafc 50%,
-      #e0e7ff 100%
+
+      #eef2ff,
+
+      #f8fafc,
+
+      #e0e7ff
+
     );
 
-  padding: 25px;
 }
 
-.register-box {
+
+.recuperar-box {
+
   width: 100%;
-  max-width: 450px;
+
+  max-width: 420px;
+
+  padding: 40px;
 
   background: white;
-
-  padding: 38px;
 
   border-radius: 20px;
 
   box-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.12);
 
-  border: 1px solid #e5e7eb;
+    0 20px 50px
+
+    rgba(0, 0, 0, 0.12);
+
 }
 
-.logo-circle {
-  width: 60px;
-  height: 60px;
 
-  margin: 0 auto 15px;
+.logo {
+
+  width: 70px;
+
+  height: 70px;
+
+  margin: 0 auto 20px;
 
   display: flex;
+
   justify-content: center;
+
   align-items: center;
 
   border-radius: 50%;
 
-  background: linear-gradient(
-    135deg,
-    #4f46e5,
-    #6366f1
-  );
+  background: #eef2ff;
 
-  color: white;
+  font-size: 32px;
 
-  font-size: 28px;
-  font-weight: 800;
-
-  box-shadow:
-    0 8px 20px rgba(79, 70, 229, 0.3);
 }
 
-h1 {
-  text-align: center;
 
-  margin: 0 0 8px;
+h1 {
+
+  margin: 0;
+
+  text-align: center;
 
   color: #111827;
 
-  font-size: 30px;
+  font-size: 28px;
+
 }
 
-.subtitle {
+
+.descripcion {
+
+  margin: 12px 0 30px;
+
   text-align: center;
 
   color: #6b7280;
 
-  margin: 0 0 28px;
-
-  font-size: 15px;
+  font-size: 14px;
 
   line-height: 1.5;
+
 }
 
-.input-group {
-  display: flex;
 
-  flex-direction: column;
+.campo {
 
-  margin-bottom: 18px;
+  margin-bottom: 20px;
+
 }
 
-.input-group label {
-  margin-bottom: 7px;
 
-  font-weight: 700;
+.campo label {
+
+  display: block;
+
+  margin-bottom: 8px;
 
   color: #374151;
 
   font-size: 14px;
+
+  font-weight: 700;
+
 }
 
-.input-group input,
-.input-group select {
+
+.campo input,
+
+.campo select {
+
   width: 100%;
 
-  padding: 13px 14px;
+  padding: 13px;
 
   border: 1px solid #d1d5db;
 
   border-radius: 10px;
 
-  background: #fff;
+  background: white;
 
   color: #111827;
 
@@ -397,116 +362,98 @@ h1 {
 
   outline: none;
 
-  transition: 0.2s;
 }
 
-.input-group input::placeholder {
-  color: #9ca3af;
-}
 
-.input-group input:focus,
-.input-group select:focus {
+.campo input:focus,
+
+.campo select:focus {
+
   border-color: #4f46e5;
 
   box-shadow:
-    0 0 0 3px rgba(79, 70, 229, 0.12);
+
+    0 0 0 3px
+
+    rgba(79, 70, 229, 0.12);
+
 }
 
-.input-group small {
-  margin-top: 6px;
 
-  color: #6b7280;
+.boton {
 
-  font-size: 12px;
-}
-
-.register-button {
   width: 100%;
 
   padding: 14px;
-
-  margin-top: 5px;
 
   border: none;
 
   border-radius: 10px;
 
-  background: linear-gradient(
-    135deg,
-    #4f46e5,
-    #6366f1
-  );
+  background: #4f46e5;
 
   color: white;
 
   font-size: 16px;
 
-  font-weight: 700;
+  font-weight: bold;
 
   cursor: pointer;
 
-  transition: 0.2s;
-
-  box-shadow:
-    0 7px 18px rgba(79, 70, 229, 0.25);
 }
 
-.register-button:hover {
-  transform: translateY(-1px);
 
-  box-shadow:
-    0 10px 22px rgba(79, 70, 229, 0.35);
+.boton:hover {
+
+  background: #3730a3;
+
 }
 
-.register-button:active {
-  transform: translateY(0);
-}
 
-.login-text {
-  text-align: center;
+.volver {
 
-  margin: 23px 0 0;
+  display: block;
 
-  color: #6b7280;
+  margin: 22px auto 0;
 
-  font-size: 14px;
-}
+  padding: 0;
 
-.link-button {
   border: none;
 
   background: none;
 
   color: #4f46e5;
 
-  font-weight: 700;
+  font-size: 14px;
+
+  font-weight: bold;
 
   cursor: pointer;
 
-  font-size: inherit;
-
-  padding: 0;
-
-  margin-left: 4px;
 }
 
-.link-button:hover {
+
+.volver:hover {
+
   text-decoration: underline;
+
 }
+
 
 @media (max-width: 500px) {
 
-  .register-container {
-    padding: 15px;
-  }
+  .recuperar-box {
 
-  .register-box {
-    padding: 28px 22px;
+    padding: 30px 22px;
+
   }
 
   h1 {
-    font-size: 26px;
+
+    font-size: 24px;
+
   }
+
 }
 
 </style>

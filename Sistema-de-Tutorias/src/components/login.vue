@@ -8,8 +8,35 @@
         Sistema de Tutorías PROA
       </p>
 
+      <!-- Tipo de usuario -->
+      <div class="input-group">
+        <label for="rol">
+          Tipo de usuario
+        </label>
+
+        <select
+          id="rol"
+          v-model="formulario.rol"
+          required
+        >
+          <option value="" disabled>
+            Seleccioná una opción
+          </option>
+
+          <option value="profesor">
+            Profesor
+          </option>
+
+          <option value="administracion">
+            Administración
+          </option>
+        </select>
+      </div>
+
+      <!-- Formulario -->
       <form @submit.prevent="iniciarSesion">
 
+        <!-- Correo -->
         <div class="input-group">
           <label for="email">
             Correo institucional
@@ -24,6 +51,7 @@
           />
         </div>
 
+        <!-- Contraseña -->
         <div class="input-group">
           <label for="password">
             Contraseña
@@ -38,6 +66,25 @@
           />
         </div>
 
+        <!-- Código de profesor -->
+        <div
+          v-if="formulario.rol === 'profesor'"
+          class="input-group"
+        >
+          <label for="codigoProfesor">
+            Código de profesor
+          </label>
+
+          <input
+            id="codigoProfesor"
+            v-model="formulario.codigoProfesor"
+            type="password"
+            placeholder="Ingresá el código de profesor"
+            required
+          />
+        </div>
+
+        <!-- Botón iniciar sesión -->
         <button type="submit">
           Iniciar sesión
         </button>
@@ -53,7 +100,7 @@
         ¿Olvidaste tu contraseña?
       </button>
 
-      <!-- Ir al registro -->
+      <!-- Registro -->
       <p class="register-text">
         ¿No tenés una cuenta?
 
@@ -77,19 +124,43 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const formulario = reactive({
+  rol: '',
   email: '',
-  password: ''
+  password: '',
+  codigoProfesor: ''
 })
 
-const iniciarSesion = () => {
-  const email = formulario.email.toLowerCase().trim()
+// Código requerido para profesores
+const CODIGO_PROFESOR = 'PROA2026'
 
-  // Verificar correo institucional PROA
+const iniciarSesion = () => {
+
+  // Verificar tipo de usuario
+  if (!formulario.rol) {
+    alert('Seleccioná si sos Profesor o Administración.')
+    return
+  }
+
+  // Limpiar correo
+  const email = formulario.email
+    .toLowerCase()
+    .trim()
+
+  // Verificar correo institucional
   if (!email.endsWith('@escuelasproa.edu.ar')) {
     alert(
       'Debés utilizar un correo institucional de Escuelas PROA.'
     )
     return
+  }
+
+  // Verificar código si es profesor
+  if (formulario.rol === 'profesor') {
+
+    if (formulario.codigoProfesor !== CODIGO_PROFESOR) {
+      alert('El código de profesor es incorrecto.')
+      return
+    }
   }
 
   // Obtener usuarios registrados
@@ -101,12 +172,13 @@ const iniciarSesion = () => {
   const usuario = usuarios.find(
     usuario =>
       usuario.email === email &&
-      usuario.password === formulario.password
+      usuario.password === formulario.password &&
+      usuario.rol === formulario.rol
   )
 
-  // Si no existe
+  // Usuario inexistente
   if (!usuario) {
-    alert('Correo o contraseña incorrectos.')
+    alert('Correo, contraseña o tipo de usuario incorrectos.')
     return
   }
 
@@ -129,7 +201,7 @@ const irAlRegistro = () => {
   router.push('/register')
 }
 
-// Ir a recuperar contraseña
+// Recuperar contraseña
 const irRecuperar = () => {
   router.push('/recuperar')
 }
@@ -178,16 +250,19 @@ h1 {
   color: #333;
 }
 
-.input-group input {
+.input-group input,
+.input-group select {
   padding: 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 15px;
   outline: none;
   box-sizing: border-box;
+  background: white;
 }
 
-.input-group input:focus {
+.input-group input:focus,
+.input-group select:focus {
   border-color: #4f46e5;
 }
 
