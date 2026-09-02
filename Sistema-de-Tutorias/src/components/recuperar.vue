@@ -1,20 +1,49 @@
 <template>
-  <div class="recover-container">
-    <div class="recover-box">
+  <div class="recuperar-container">
+
+    <div class="recuperar-box">
+
+      <div class="logo">
+        🔐
+      </div>
 
       <h1>Recuperar contraseña</h1>
 
-      <p class="subtitle">
-        Ingresá tu correo institucional PROA
+      <p class="descripcion">
+        Recuperá el acceso a tu cuenta de PROA.
       </p>
 
-      <!-- Buscar usuario -->
-      <form
-        v-if="!usuarioEncontrado"
-        @submit.prevent="buscarUsuario"
-      >
+      <form @submit.prevent="recuperar">
 
-        <div class="input-group">
+        <!-- TIPO DE USUARIO -->
+        <div class="campo">
+
+          <label>
+            Tipo de usuario
+          </label>
+
+          <select v-model="tipo" required>
+
+            <option value="" disabled>
+              Seleccioná una opción
+            </option>
+
+            <option value="profesor">
+              Profesor
+            </option>
+
+            <option value="administrador">
+              Administración
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- CORREO -->
+        <div class="campo">
+
           <label for="email">
             Correo institucional
           </label>
@@ -26,252 +55,405 @@
             placeholder="ejemplo@escuelasproa.edu.ar"
             required
           />
+
         </div>
 
-        <button type="submit">
-          Continuar
+
+        <!-- BOTÓN -->
+        <button
+          type="submit"
+          class="boton"
+        >
+          Recuperar contraseña
         </button>
 
       </form>
 
-      <!-- Cambiar contraseña -->
-      <form
-        v-else
-        @submit.prevent="cambiarPassword"
-      >
 
-        <div class="input-group">
-          <label for="password">
-            Nueva contraseña
-          </label>
-
-          <input
-            id="password"
-            v-model="nuevaPassword"
-            type="password"
-            placeholder="Ingresá una nueva contraseña"
-            minlength="6"
-            required
-          />
-        </div>
-
-        <div class="input-group">
-          <label for="confirmar">
-            Confirmar nueva contraseña
-          </label>
-
-          <input
-            id="confirmar"
-            v-model="confirmarPassword"
-            type="password"
-            placeholder="Repetí la nueva contraseña"
-            minlength="6"
-            required
-          />
-        </div>
-
-        <button type="submit">
-          Cambiar contraseña
-        </button>
-
-      </form>
-
+      <!-- VOLVER -->
       <button
         type="button"
-        class="link-button"
-        @click="volverLogin"
+        class="volver"
+        @click="volver"
       >
-        Volver al inicio de sesión
+        ← Volver al inicio de sesión
       </button>
 
     </div>
+
   </div>
 </template>
 
+
 <script setup>
+
 import { ref } from 'vue'
+
 import { useRouter } from 'vue-router'
+
 
 const router = useRouter()
 
+
 const email = ref('')
-const nuevaPassword = ref('')
-const confirmarPassword = ref('')
-const usuarioEncontrado = ref(false)
 
-const buscarUsuario = () => {
-  const correo = email.value.toLowerCase().trim()
+const tipo = ref('')
 
-  // Verificar correo PROA
+
+const recuperar = () => {
+
+  const correo = email.value
+    .trim()
+    .toLowerCase()
+
+
+  // Verificar correo
   if (!correo.endsWith('@escuelasproa.edu.ar')) {
+
     alert(
       'Debés utilizar un correo institucional de Escuelas PROA.'
     )
+
     return
   }
+
+
+  // Verificar tipo
+  if (!tipo.value) {
+
+    alert(
+      'Seleccioná Profesor o Administración.'
+    )
+
+    return
+  }
+
 
   // Obtener usuarios
   const usuarios = JSON.parse(
     localStorage.getItem('usuariosPROA') || '[]'
   )
 
+
   // Buscar usuario
   const usuario = usuarios.find(
-    usuario => usuario.email === correo
+
+    usuario =>
+
+      usuario.email === correo &&
+
+      usuario.tipo === tipo.value
+
   )
 
+
   if (!usuario) {
+
     alert(
-      'No encontramos una cuenta registrada con ese correo.'
+      'No encontramos una cuenta con ese correo y tipo de usuario.'
     )
+
     return
+
   }
 
-  email.value = correo
-  usuarioEncontrado.value = true
-}
 
-const cambiarPassword = () => {
+  // Pedir nueva contraseña
+  const nuevaPassword = prompt(
+    'Ingresá tu nueva contraseña:'
+  )
 
-  // Verificar longitud
-  if (nuevaPassword.value.length < 6) {
+
+  if (nuevaPassword === null) {
+
+    return
+
+  }
+
+
+  if (nuevaPassword.length < 6) {
+
     alert(
       'La contraseña debe tener al menos 6 caracteres.'
     )
+
     return
+
   }
 
-  // Verificar contraseñas
-  if (
-    nuevaPassword.value !==
-    confirmarPassword.value
-  ) {
-    alert(
-      'Las contraseñas no coinciden.'
-    )
-    return
-  }
 
-  // Obtener usuarios
-  const usuarios = JSON.parse(
-    localStorage.getItem('usuariosPROA') || '[]'
-  )
+  // Actualizar contraseña
+  usuario.password = nuevaPassword
 
-  // Buscar usuario
-  const usuario = usuarios.find(
-    usuario => usuario.email === email.value
-  )
 
-  if (!usuario) {
-    alert('No se encontró el usuario.')
-    return
-  }
-
-  // Cambiar contraseña
-  usuario.password = nuevaPassword.value
-
-  // Guardar usuarios actualizados
+  // Guardar cambios
   localStorage.setItem(
     'usuariosPROA',
     JSON.stringify(usuarios)
   )
 
+
   alert(
     '¡Contraseña cambiada correctamente!'
   )
 
-  // Volver al Login
+
   router.push('/login')
+
 }
 
-const volverLogin = () => {
+
+const volver = () => {
+
   router.push('/login')
+
 }
+
 </script>
 
+
 <style scoped>
-.recover-container {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #f2f4f7;
-  padding: 20px;
-}
 
-.recover-box {
-  width: 100%;
-  max-width: 400px;
-  background: white;
-  padding: 35px;
-  border-radius: 15px;
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
-}
-
-h1 {
-  text-align: center;
-  margin: 0 0 10px;
-  color: #222;
-}
-
-.subtitle {
-  text-align: center;
-  color: #777;
-  margin-bottom: 30px;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 20px;
-}
-
-.input-group label {
-  margin-bottom: 7px;
-  font-weight: bold;
-  color: #333;
-}
-
-.input-group input {
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 15px;
-  outline: none;
+* {
   box-sizing: border-box;
 }
 
-.input-group input:focus {
-  border-color: #4f46e5;
+
+.recuperar-container {
+
+  min-height: 100vh;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  padding: 20px;
+
+  background:
+
+    linear-gradient(
+
+      135deg,
+
+      #eef2ff,
+
+      #f8fafc,
+
+      #e0e7ff
+
+    );
+
 }
 
-button[type="submit"] {
+
+.recuperar-box {
+
   width: 100%;
-  padding: 13px;
-  border: none;
-  border-radius: 8px;
-  background: #4f46e5;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
+
+  max-width: 420px;
+
+  padding: 40px;
+
+  background: white;
+
+  border-radius: 20px;
+
+  box-shadow:
+
+    0 20px 50px
+
+    rgba(0, 0, 0, 0.12);
+
 }
 
-button[type="submit"]:hover {
-  background: #3730a3;
+
+.logo {
+
+  width: 70px;
+
+  height: 70px;
+
+  margin: 0 auto 20px;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  border-radius: 50%;
+
+  background: #eef2ff;
+
+  font-size: 32px;
+
 }
 
-.link-button {
-  display: block;
-  margin: 20px auto 0;
-  border: none;
-  background: none;
-  color: #4f46e5;
-  cursor: pointer;
+
+h1 {
+
+  margin: 0;
+
+  text-align: center;
+
+  color: #111827;
+
+  font-size: 28px;
+
+}
+
+
+.descripcion {
+
+  margin: 12px 0 30px;
+
+  text-align: center;
+
+  color: #6b7280;
+
   font-size: 14px;
+
+  line-height: 1.5;
+
 }
 
-.link-button:hover {
-  text-decoration: underline;
+
+.campo {
+
+  margin-bottom: 20px;
+
 }
+
+
+.campo label {
+
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #374151;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+}
+
+
+.campo input,
+
+.campo select {
+
+  width: 100%;
+
+  padding: 13px;
+
+  border: 1px solid #d1d5db;
+
+  border-radius: 10px;
+
+  background: white;
+
+  color: #111827;
+
+  font-size: 15px;
+
+  outline: none;
+
+}
+
+
+.campo input:focus,
+
+.campo select:focus {
+
+  border-color: #4f46e5;
+
+  box-shadow:
+
+    0 0 0 3px
+
+    rgba(79, 70, 229, 0.12);
+
+}
+
+
+.boton {
+
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: #4f46e5;
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+}
+
+
+.boton:hover {
+
+  background: #3730a3;
+
+}
+
+
+.volver {
+
+  display: block;
+
+  margin: 22px auto 0;
+
+  padding: 0;
+
+  border: none;
+
+  background: none;
+
+  color: #4f46e5;
+
+  font-size: 14px;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+}
+
+
+.volver:hover {
+
+  text-decoration: underline;
+
+}
+
+
+@media (max-width: 500px) {
+
+  .recuperar-box {
+
+    padding: 30px 22px;
+
+  }
+
+  h1 {
+
+    font-size: 24px;
+
+  }
+
+}
+
 </style>
