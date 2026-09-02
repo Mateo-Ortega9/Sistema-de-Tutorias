@@ -206,7 +206,7 @@
 
           </div>
 
-
+  
           <ListasDeEstudiantes
             v-if="vista === 'estudiantes' || vista === 'calendario'"
             :curso="cursoSeleccionado"
