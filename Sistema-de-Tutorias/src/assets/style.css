@@ -1,0 +1,395 @@
+/* =========================================
+   SISTEMA DE TUTORÍAS PROA
+   DISEÑO AZUL Y BLANCO
+========================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, #eaf4ff 0%, #d8eaff 50%, #f7fbff 100%);
+  color: #172554;
+}
+
+/* =========================================
+   CONTENEDORES
+========================================= */
+
+.login-container,
+.register-container,
+.recuperar-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* círculos decorativos */
+
+.login-container::before,
+.register-container::before,
+.recuperar-container::before {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: rgba(59, 130, 246, 0.12);
+  border-radius: 50%;
+  top: -180px;
+  left: -150px;
+}
+
+.login-container::after,
+.register-container::after,
+.recuperar-container::after {
+  content: "";
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  background: rgba(96, 165, 250, 0.13);
+  border-radius: 50%;
+  bottom: -170px;
+  right: -120px;
+}
+
+/* =========================================
+   TARJETA PRINCIPAL
+========================================= */
+
+.login-box,
+.register-box,
+.recuperar-box {
+  position: relative;
+  z-index: 2;
+
+  width: 100%;
+  max-width: 450px;
+
+  background: rgba(255, 255, 255, 0.96);
+
+  padding: 42px;
+
+  border-radius: 25px;
+
+  border: 1px solid rgba(255, 255, 255, 0.9);
+
+  box-shadow:
+    0 25px 60px rgba(30, 64, 175, 0.15),
+    0 8px 20px rgba(15, 23, 42, 0.06);
+
+  animation: aparecer 0.6s ease;
+}
+
+/* =========================================
+   ANIMACIÓN
+========================================= */
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================
+   LOGO / ICONO
+========================================= */
+
+.logo {
+  width: 70px;
+  height: 70px;
+
+  margin: 0 auto 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 20px;
+
+  background: linear-gradient(135deg, #2563eb, #60a5fa);
+
+  color: white;
+
+  font-size: 32px;
+  font-weight: bold;
+
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+}
+
+/* =========================================
+   TÍTULOS
+========================================= */
+
+.login-box h1,
+.register-box h1,
+.recuperar-box h1 {
+  text-align: center;
+
+  font-size: 30px;
+
+  font-weight: 750;
+
+  color: #173b8f;
+
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  text-align: center;
+
+  color: #64748b;
+
+  font-size: 15px;
+
+  line-height: 1.5;
+
+  margin-bottom: 28px;
+}
+
+/* =========================================
+   FORMULARIOS
+========================================= */
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  color: #334155;
+
+  font-size: 14px;
+
+  font-weight: 650;
+
+  margin-bottom: 7px;
+}
+
+input,
+select {
+  width: 100%;
+
+  padding: 14px 16px;
+
+  background: #f8fbff;
+
+  border: 1.5px solid #dbeafe;
+
+  border-radius: 12px;
+
+  outline: none;
+
+  font-size: 15px;
+
+  color: #1e293b;
+
+  transition: all 0.25s ease;
+}
+
+input::placeholder {
+  color: #94a3b8;
+}
+
+input:hover,
+select:hover {
+  border-color: #93c5fd;
+}
+
+input:focus,
+select:focus {
+  background: white;
+
+  border-color: #3b82f6;
+
+  box-shadow:
+    0 0 0 4px rgba(59, 130, 246, 0.11);
+
+  transform: translateY(-1px);
+}
+
+/* =========================================
+   BOTÓN PRINCIPAL
+========================================= */
+
+button {
+  width: 100%;
+
+  padding: 14px 18px;
+
+  margin-top: 5px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #3b82f6
+  );
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 18px rgba(37, 99, 235, 0.22);
+
+  transition: all 0.25s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 12px 25px rgba(37, 99, 235, 0.3);
+
+  background: linear-gradient(
+    135deg,
+    #1d4ed8,
+    #2563eb
+  );
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* =========================================
+   ENLACES
+========================================= */
+
+a {
+  color: #2563eb;
+
+  text-decoration: none;
+
+  font-weight: 650;
+
+  transition: 0.2s;
+}
+
+a:hover {
+  color: #1d4ed8;
+
+  text-decoration: underline;
+}
+
+/* =========================================
+   ENLACES DEL LOGIN
+========================================= */
+
+.forgot-password {
+  text-align: right;
+
+  margin-top: -7px;
+
+  font-size: 14px;
+}
+
+/* =========================================
+   TEXTO INFERIOR
+========================================= */
+
+.bottom-text {
+  text-align: center;
+
+  margin-top: 23px;
+
+  color: #64748b;
+
+  font-size: 14px;
+}
+
+/* =========================================
+   MENSAJES
+========================================= */
+
+.error {
+  background: #fff1f2;
+
+  color: #be123c;
+
+  border: 1px solid #fecdd3;
+
+  padding: 12px 14px;
+
+  border-radius: 10px;
+
+  font-size: 14px;
+
+  text-align: center;
+}
+
+.success {
+  background: #eff6ff;
+
+  color: #1d4ed8;
+
+  border: 1px solid #bfdbfe;
+
+  padding: 12px 14px;
+
+  border-radius: 10px;
+
+  font-size: 14px;
+
+  text-align: center;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 600px) {
+  .login-box,
+  .register-box,
+  .recuperar-box {
+    padding: 30px 23px;
+
+    border-radius: 20px;
+  }
+
+  .login-box h1,
+  .register-box h1,
+  .recuperar-box h1 {
+    font-size: 26px;
+  }
+
+  .logo {
+    width: 60px;
+    height: 60px;
+
+    font-size: 27px;
+  }
+}
