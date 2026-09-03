@@ -262,5 +262,6 @@ body {
   .app-body {
     grid-template-columns: 1fr;
   }
+  /* Me ahora hize yo todo, ese dante catini se paso che */
 }
 </style>
