@@ -1,11 +1,17 @@
 <template>
-  <router-view />
+  <Filtros />
 </template>
 
 <script>
+import Filtros from "./components/Filtros.vue";
+
 export default {
-  name: 'App'
-}
+  name: "App",
+
+  components: {
+    Filtros
+  }
+};
 </script>
 
 <style>
