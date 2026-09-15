@@ -130,9 +130,6 @@ const formulario = reactive({
   codigoProfesor: ''
 })
 
-// Código requerido para profesores
-const CODIGO_PROFESOR = 'PROA2026'
-
 const iniciarSesion = () => {
 
   // Verificar tipo de usuario
@@ -154,15 +151,6 @@ const iniciarSesion = () => {
     return
   }
 
-  // Verificar código si es profesor
-  if (formulario.rol === 'profesor') {
-
-    if (formulario.codigoProfesor !== CODIGO_PROFESOR) {
-      alert('El código de profesor es incorrecto.')
-      return
-    }
-  }
-
   // Obtener usuarios registrados
   const usuarios = JSON.parse(
     localStorage.getItem('usuariosPROA') || '[]'
@@ -173,7 +161,7 @@ const iniciarSesion = () => {
     usuario =>
       usuario.email === email &&
       usuario.password === formulario.password &&
-      (usuario.rol === formulario.rol || usuario.tipo === formulario.rol)
+      usuario.rol === formulario.rol
   )
 
   // Usuario inexistente
@@ -193,11 +181,7 @@ const iniciarSesion = () => {
   console.log('Usuario conectado:', usuario)
 
   // Ir al inicio
-  if (formulario.rol === 'profesor') {
-    router.push('/filtros')
-  } else {
-    router.push('/')
-  }
+  router.push('/')
 }
 
 // Ir al registro
