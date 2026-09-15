@@ -173,7 +173,7 @@ const iniciarSesion = () => {
     usuario =>
       usuario.email === email &&
       usuario.password === formulario.password &&
-      usuario.rol === formulario.rol
+      (usuario.rol === formulario.rol || usuario.tipo === formulario.rol)
   )
 
   // Usuario inexistente
@@ -193,7 +193,11 @@ const iniciarSesion = () => {
   console.log('Usuario conectado:', usuario)
 
   // Ir al inicio
-  router.push('/')
+  if (formulario.rol === 'profesor') {
+    router.push('/filtros')
+  } else {
+    router.push('/')
+  }
 }
 
 // Ir al registro
