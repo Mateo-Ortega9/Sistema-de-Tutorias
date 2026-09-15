@@ -5,11 +5,29 @@ import TheWelcome from '../components/TheWelcome.vue'
 import ListasDeEstudiantes from '../components/ListasDeEstudiantes.vue'
 import Filtros from '../components/Filtros.vue'
 import EnviarTutoria from '../components/EnviarTutoria.vue'
+import Login from '../components/login.vue'
+import Register from '../components/register.vue'
+import Recuperar from '../components/recuperar.vue'
 
 const router = createRouter({
   history: createWebHistory(),
 
   routes: [
+    {
+      path: '/login',
+      name: 'login',
+      component: Login
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: Register
+    },
+    {
+      path: '/recuperar',
+      name: 'recuperar',
+      component: Recuperar
+    },
     {
       path: '/',
       name: 'inicio',
