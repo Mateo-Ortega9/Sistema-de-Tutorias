@@ -66,24 +66,6 @@
           />
         </div>
 
-        <!-- Código de profesor -->
-        <div
-          v-if="formulario.rol === 'profesor'"
-          class="input-group"
-        >
-          <label for="codigoProfesor">
-            Código de profesor
-          </label>
-
-          <input
-            id="codigoProfesor"
-            v-model="formulario.codigoProfesor"
-            type="password"
-            placeholder="Ingresá el código de profesor"
-            required
-          />
-        </div>
-
         <!-- Botón iniciar sesión -->
         <button type="submit">
           Iniciar sesión
@@ -127,7 +109,6 @@ const formulario = reactive({
   rol: '',
   email: '',
   password: '',
-  codigoProfesor: ''
 })
 
 const iniciarSesion = () => {
@@ -161,7 +142,7 @@ const iniciarSesion = () => {
     usuario =>
       usuario.email === email &&
       usuario.password === formulario.password &&
-      usuario.rol === formulario.rol
+      (usuario.rol === formulario.rol || usuario.tipo === formulario.rol)
   )
 
   // Usuario inexistente
@@ -181,7 +162,11 @@ const iniciarSesion = () => {
   console.log('Usuario conectado:', usuario)
 
   // Ir al inicio
-  router.push('/')
+  if (formulario.rol === 'profesor') {
+    router.push('/filtros')
+  } else {
+    router.push('/')
+  }
 }
 
 // Ir al registro
