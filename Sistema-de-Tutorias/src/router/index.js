@@ -1,33 +1,41 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-const routes = [
-  {
-    path: '/',
-    redirect: '/login'
-  },
-
-  {
-    path: '/login',
-    name: 'Login',
-    component: () => import('../components/Login.vue')
-  },
-
-  {
-    path: '/register',
-    name: 'Register',
-    component: () => import('../components/Register.vue')
-  },
-
-  {
-    path: '/recuperar',
-    name: 'Recuperar',
-    component: () => import('../components/Recuperar.vue')
-  }
-]
+import HelloWorld from '../components/HelloWorld.vue'
+import TheWelcome from '../components/TheWelcome.vue'
+import ListasDeEstudiantes from '../components/ListasDeEstudiantes.vue'
+import Filtros from '../components/Filtros.vue'
+import EnviarTutoria from '../components/EnviarTutoria.vue'
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+
+  routes: [
+    {
+      path: '/',
+      name: 'inicio',
+      component: TheWelcome
+    },
+    {
+      path: '/estudiantes',
+      name: 'estudiantes',
+      component: ListasDeEstudiantes
+    },
+    {
+      path: '/filtros',
+      name: 'filtros',
+      component: Filtros
+    },
+    {
+      path: '/enviar-tutoria',
+      name: 'enviar-tutoria',
+      component: EnviarTutoria
+    },
+    {
+      path: '/hello',
+      name: 'hello',
+      component: HelloWorld
+    }
+  ]
 })
 
 export default router
