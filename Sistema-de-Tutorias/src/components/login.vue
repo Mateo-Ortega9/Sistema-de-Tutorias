@@ -137,13 +137,15 @@ const iniciarSesion = () => {
     localStorage.getItem('usuariosPROA') || '[]'
   )
 
-  // Buscar usuario
-  const usuario = usuarios.find(
-    usuario =>
-      usuario.email === email &&
+  // Buscar usuario profesor registrado
+  const usuario = usuarios.find(usuario => {
+    const emailUsuario = String(usuario.email || '').trim().toLowerCase()
+    const rolUsuario = String(usuario.rol || usuario.tipo || '').trim().toLowerCase()
+
+    return emailUsuario === email &&
       usuario.password === formulario.password &&
-      (usuario.rol === formulario.rol || usuario.tipo === formulario.rol)
-  )
+      rolUsuario === formulario.rol
+  })
 
   // Usuario inexistente
   if (!usuario) {
