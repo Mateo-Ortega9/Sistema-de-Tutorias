@@ -31,7 +31,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'inicio',
-      component: TheWelcome
+      redirect: '/login'
     },
     {
       path: '/estudiantes',
