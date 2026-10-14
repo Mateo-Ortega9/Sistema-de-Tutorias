@@ -1,10 +1,12 @@
 <script setup>
 import { ref, computed } from 'vue'
-import SidebarNav from './SidebarNav.vue'
-import AppIcon from './AppIcon.vue'
-import DashboardPanel from './DashboardPanel.vue'
-import PlaceholderPanel from './PlaceholderPanel.vue'
+import { useRouter } from 'vue-router'
+import SidebarNav from './Sidebarnav.vue'
+import AppIcon from './Appicon.vue'
+import DashboardPanel from './Dashboardpanel.vue'
+import PlaceholderPanel from './Placehoderpanel.vue'
 
+const router = useRouter()
 const sidebarOpen = ref(false)
 const activeId = ref('panel-principal')
 
@@ -26,8 +28,8 @@ function handleSelect(id) {
 }
 
 function handleLogout() {
-  // TODO: conectar con la lógica real de auth (store, router.push('/login'), etc.)
-  window.alert('Cerrando sesión...')
+  localStorage.removeItem('usuarioActual')
+  router.push('/login')
 }
 </script>
 
