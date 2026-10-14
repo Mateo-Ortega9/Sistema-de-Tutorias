@@ -26,19 +26,52 @@
           aria-label="Abrir perfil"
           @click="mostrarPerfil = !mostrarPerfil"
         >
-          👤
+          <img
+            v-if="perfil.foto"
+            :src="perfil.foto"
+            alt="Foto de perfil"
+          />
+          <span v-else>
+            {{ inicialesPerfil }}
+          </span>
         </button>
 
         <div
           v-if="mostrarPerfil"
           class="perfil-menu"
         >
+          <div class="perfil-resumen">
+            <div class="mini-avatar">
+              <img
+                v-if="perfil.foto"
+                :src="perfil.foto"
+                alt="Foto de perfil"
+              />
+              <span v-else>
+                {{ inicialesPerfil }}
+              </span>
+            </div>
+
+            <div>
+              <strong>{{ nombreCompleto }}</strong>
+              <small>{{ perfil.email || 'Profesor' }}</small>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="perfil-opcion"
+            @click="abrirEditorPerfil"
+          >
+            👤 Mi perfil
+          </button>
+
           <button
             type="button"
             class="cerrar-sesion"
             @click="cerrarSesion"
           >
-            Cerrar sesión
+            ↪ Cerrar sesión
           </button>
         </div>
 
@@ -264,6 +297,145 @@
 
     </div>
 
+    <!-- PERFIL DEL PROFESOR -->
+    <div
+      v-if="mostrarEditorPerfil"
+      class="fondo-modal perfil-fondo"
+      @click.self="mostrarEditorPerfil = false"
+    >
+      <div class="modal perfil-modal">
+
+        <button
+          class="cerrar"
+          type="button"
+          aria-label="Cerrar perfil"
+          @click="mostrarEditorPerfil = false"
+        >
+          ✕
+        </button>
+
+        <div class="perfil-encabezado">
+          <div>
+            <span class="etiqueta-perfil">CUENTA DEL PROFESOR</span>
+            <h2>Mi perfil</h2>
+            <p>Completá tus datos para que los estudiantes te reconozcan.</p>
+          </div>
+        </div>
+
+        <div class="perfil-contenido">
+          <div class="foto-editor">
+            <div class="avatar-grande">
+              <img
+                v-if="perfil.foto"
+                :src="perfil.foto"
+                alt="Foto de perfil"
+              />
+              <span v-else>
+                {{ inicialesPerfil }}
+              </span>
+            </div>
+
+            <label
+              class="boton-foto"
+              for="fotoPerfil"
+            >
+              📷 Cambiar foto
+            </label>
+
+            <input
+              id="fotoPerfil"
+              class="input-foto"
+              type="file"
+              accept="image/png, image/jpeg, image/webp"
+              @change="seleccionarFoto"
+            />
+
+            <small>JPG, PNG o WEBP. Máximo 2 MB.</small>
+          </div>
+
+          <div class="perfil-formulario">
+            <div class="perfil-fila">
+              <div class="perfil-campo">
+                <label for="perfilNombre">Nombre</label>
+                <input
+                  id="perfilNombre"
+                  v-model="perfil.nombre"
+                  type="text"
+                  placeholder="Tu nombre"
+                />
+              </div>
+
+              <div class="perfil-campo">
+                <label for="perfilApellido">Apellido</label>
+                <input
+                  id="perfilApellido"
+                  v-model="perfil.apellido"
+                  type="text"
+                  placeholder="Tu apellido"
+                />
+              </div>
+            </div>
+
+            <div class="perfil-campo">
+              <label for="perfilEmail">Correo institucional</label>
+              <input
+                id="perfilEmail"
+                v-model="perfil.email"
+                type="email"
+                disabled
+              />
+            </div>
+
+            <div class="perfil-campo">
+              <label for="perfilMateria">Materia que enseñás</label>
+              <select
+                id="perfilMateria"
+                v-model="perfil.materia"
+              >
+                <option
+                  v-for="materia in materiasDisponibles"
+                  :key="materia.valor"
+                  :value="materia.valor"
+                >
+                  {{ materia.nombre }}
+                </option>
+              </select>
+            </div>
+
+            <div class="perfil-campo">
+              <label for="perfilDescripcion">Sobre vos</label>
+              <textarea
+                id="perfilDescripcion"
+                v-model="perfil.descripcion"
+                rows="3"
+                maxlength="180"
+                placeholder="Contales algo breve a tus estudiantes..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="perfil-acciones">
+          <button
+            type="button"
+            class="boton-secundario"
+            @click="mostrarEditorPerfil = false"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="button"
+            class="boton-guardar"
+            @click="guardarPerfil"
+          >
+            Guardar cambios
+          </button>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -292,6 +464,23 @@ export default {
 
       mostrarEnviar: false,
       mostrarPerfil: false,
+      mostrarEditorPerfil: false,
+
+      perfil: {
+        nombre: "",
+        apellido: "",
+        email: "",
+        materia: "todas",
+        descripcion: "",
+        foto: ""
+      },
+
+      materiasDisponibles: [
+        { valor: "matematica", nombre: "Matemática" },
+        { valor: "lengua", nombre: "Lengua" },
+        { valor: "ingles", nombre: "Inglés" },
+        { valor: "programacion", nombre: "Programación" }
+      ],
 
       dias: [
         "LUN",
@@ -306,7 +495,41 @@ export default {
     };
   },
 
+  created() {
+    const usuarioGuardado = JSON.parse(
+      localStorage.getItem("usuarioActual") || "null"
+    );
+
+    if (usuarioGuardado) {
+      this.perfil = {
+        ...this.perfil,
+        nombre: usuarioGuardado.nombre || "",
+        apellido: usuarioGuardado.apellido || "",
+        email: usuarioGuardado.email || "",
+        materia: usuarioGuardado.materia || "todas",
+        descripcion: usuarioGuardado.descripcion || "",
+        foto: usuarioGuardado.foto || ""
+      };
+    }
+  },
+
   computed: {
+
+    nombreCompleto() {
+      const nombre = [this.perfil.nombre, this.perfil.apellido]
+        .filter(Boolean)
+        .join(" ");
+
+      return nombre || "Profesor";
+    },
+
+    inicialesPerfil() {
+      const letras = [this.perfil.nombre, this.perfil.apellido]
+        .filter(Boolean)
+        .map(texto => texto.charAt(0).toUpperCase());
+
+      return letras.join("").slice(0, 2) || "P";
+    },
 
     estudiantesFiltrados() {
 
@@ -352,7 +575,85 @@ export default {
 
   },
 
-  methods {
+  methods: {
+
+    abrirEditorPerfil() {
+      this.mostrarPerfil = false;
+      this.mostrarEditorPerfil = true;
+    },
+
+    seleccionarFoto(evento) {
+      const archivo = evento.target.files?.[0];
+
+      if (!archivo) {
+        return;
+      }
+
+      if (archivo.size > 2 * 1024 * 1024) {
+        alert("La foto no puede pesar más de 2 MB.");
+        evento.target.value = "";
+        return;
+      }
+
+      const lector = new FileReader();
+
+      lector.onload = () => {
+        this.perfil.foto = lector.result;
+      };
+
+      lector.readAsDataURL(archivo);
+    },
+
+    guardarPerfil() {
+      const nombre = this.perfil.nombre.trim();
+      const apellido = this.perfil.apellido.trim();
+
+      if (!nombre || !apellido) {
+        alert("Completá tu nombre y apellido.");
+        return;
+      }
+
+      const usuarios = JSON.parse(
+        localStorage.getItem("usuariosPROA") || "[]"
+      );
+      const usuarioActual = JSON.parse(
+        localStorage.getItem("usuarioActual") || "null"
+      );
+
+      const usuario = usuarios.find(item =>
+        (usuarioActual?.id && item.id === usuarioActual.id) ||
+        item.email === this.perfil.email
+      );
+
+      const datosPerfil = {
+        nombre,
+        apellido,
+        materia: this.perfil.materia,
+        descripcion: this.perfil.descripcion.trim(),
+        foto: this.perfil.foto
+      };
+
+      if (usuario) {
+        Object.assign(usuario, datosPerfil);
+        localStorage.setItem("usuariosPROA", JSON.stringify(usuarios));
+        localStorage.setItem(
+          "usuarioActual",
+          JSON.stringify({ ...usuarioActual, ...usuario })
+        );
+      } else if (usuarioActual) {
+        localStorage.setItem(
+          "usuarioActual",
+          JSON.stringify({ ...usuarioActual, ...datosPerfil })
+        );
+      }
+
+      this.perfil = {
+        ...this.perfil,
+        ...datosPerfil
+      };
+      this.mostrarEditorPerfil = false;
+      alert("Perfil actualizado correctamente.");
+    },
 
     cerrarSesion() {
       localStorage.removeItem("usuarioActual");
@@ -433,12 +734,25 @@ export default {
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  padding: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
 
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+.user img,
+.mini-avatar img,
+.avatar-grande img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 .perfil {
   position: relative;
@@ -468,6 +782,237 @@ export default {
 
 .cerrar-sesion:hover {
   background: #e9eff8;
+}
+
+.perfil-resumen {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 6px;
+}
+
+.perfil-resumen strong,
+.perfil-resumen small {
+  display: block;
+}
+
+.perfil-resumen strong {
+  color: #1f2937;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.perfil-resumen small {
+  margin-top: 3px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.mini-avatar {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.perfil-opcion,
+.cerrar-sesion {
+  border-radius: 6px;
+}
+
+.perfil-opcion {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+  color: #27364b;
+}
+
+.perfil-opcion:hover {
+  background: #eef2ff;
+}
+
+/* PERFIL */
+.perfil-fondo {
+  z-index: 110;
+}
+
+.perfil-modal {
+  width: 760px;
+  max-width: 94%;
+  padding: 30px;
+}
+
+.perfil-encabezado {
+  padding-right: 25px;
+  margin-bottom: 24px;
+}
+
+.etiqueta-perfil {
+  color: #4f46e5;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.perfil-encabezado h2 {
+  margin: 7px 0 5px;
+  color: #172033;
+  font-size: 28px;
+}
+
+.perfil-encabezado p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.perfil-contenido {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.foto-editor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.avatar-grande {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  font-weight: 800;
+  overflow: hidden;
+  box-shadow: 0 12px 25px rgba(79, 70, 229, 0.25);
+}
+
+.boton-foto {
+  padding: 9px 13px;
+  border-radius: 8px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.boton-foto:hover {
+  background: #e0e7ff;
+}
+
+.input-foto {
+  display: none;
+}
+
+.foto-editor small {
+  color: #9ca3af;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.perfil-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.perfil-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.perfil-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.perfil-campo label {
+  color: #374151;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.perfil-campo input,
+.perfil-campo select,
+.perfil-campo textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  color: #1f2937;
+  font: inherit;
+  outline: none;
+  resize: vertical;
+}
+
+.perfil-campo input:focus,
+.perfil-campo select:focus,
+.perfil-campo textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.perfil-campo input:disabled {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.perfil-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.boton-secundario,
+.boton-guardar {
+  padding: 11px 17px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.boton-secundario {
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #4b5563;
+}
+
+.boton-guardar {
+  border: none;
+  background: #4f46e5;
+  color: white;
+}
+
+.boton-guardar:hover {
+  background: #4338ca;
 }
 
 /* ESTRUCTURA */
@@ -745,6 +1290,30 @@ export default {
   font-size: 20px;
 
   cursor: pointer;
+}
+
+
+@media (max-width: 650px) {
+  .perfil-modal {
+    padding: 24px 18px;
+  }
+
+  .perfil-contenido {
+    grid-template-columns: 1fr;
+  }
+
+  .perfil-fila {
+    grid-template-columns: 1fr;
+  }
+
+  .perfil-acciones {
+    flex-direction: column-reverse;
+  }
+
+  .boton-secundario,
+  .boton-guardar {
+    width: 100%;
+  }
 }
 
 </style>
