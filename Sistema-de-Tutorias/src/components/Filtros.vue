@@ -18,8 +18,30 @@
         Sistema de Tutorías
       </div>
 
-      <div class="user">
-        👤
+      <div class="perfil">
+
+        <button
+          class="user"
+          type="button"
+          aria-label="Abrir perfil"
+          @click="mostrarPerfil = !mostrarPerfil"
+        >
+          👤
+        </button>
+
+        <div
+          v-if="mostrarPerfil"
+          class="perfil-menu"
+        >
+          <button
+            type="button"
+            class="cerrar-sesion"
+            @click="cerrarSesion"
+          >
+            Cerrar sesión
+          </button>
+        </div>
+
       </div>
 
     </header>
@@ -269,6 +291,7 @@ export default {
       vista: "calendario",
 
       mostrarEnviar: false,
+      mostrarPerfil: false,
 
       dias: [
         "LUN",
@@ -329,7 +352,12 @@ export default {
 
   },
 
-  methods: {
+  methods {
+
+    cerrarSesion() {
+      localStorage.removeItem("usuarioActual");
+      this.$router.push("/login");
+    },
 
     colorCelda(semana, dia) {
 
@@ -411,6 +439,36 @@ export default {
   justify-content: center;
 }
 
+
+.perfil {
+  position: relative;
+}
+
+.perfil-menu {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  min-width: 150px;
+  padding: 8px;
+  background: white;
+  border: 1px solid #222;
+  border-radius: 7px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.cerrar-sesion {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cerrar-sesion:hover {
+  background: #e9eff8;
+}
 
 /* ESTRUCTURA */
 
