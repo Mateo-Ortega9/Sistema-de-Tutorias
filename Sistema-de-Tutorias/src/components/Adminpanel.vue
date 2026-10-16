@@ -84,6 +84,7 @@ function handleLogout() {
 
 <style scoped>
 .app-shell {
+  /* Paleta */
   --color-ink: #123c4b;
   --color-ink-soft: #1e3f63;
   --color-ink-line: #2c5878;
@@ -98,16 +99,25 @@ function handleLogout() {
   --color-teal-deep: #1f8079;
   --color-teal-soft: #dbf5f2;
   --color-line: #dee3cd;
+  --color-success: #1f8f5c;
+  --color-success-bg: #dcf7e7;
+  --color-warning: #1f8079;
+  --color-warning-bg: #dbf5f2;
   --color-neutral: #5d7280;
   --color-neutral-bg: #e6e8da;
 
+  /* Tipografía */
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'Inter', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
 
+  /* Layout */
   --header-height: 64px;
 
-  height: 100dvh;
+  /* El panel ocupa SIEMPRE toda la ventana, sin depender de #app, body ni main.css */
+  position: fixed;
+  inset: 0;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   background: var(--color-paper);
@@ -116,6 +126,7 @@ function handleLogout() {
   overflow: hidden;
 }
 
+/* Header */
 .app-header {
   flex: none;
   height: var(--header-height);
@@ -210,6 +221,7 @@ function handleLogout() {
   color: #b7c0d1;
 }
 
+/* Cuerpo: sidebar + contenido */
 .app-body {
   flex: 1;
   display: grid;
@@ -233,5 +245,6 @@ function handleLogout() {
   .app-body {
     grid-template-columns: 1fr;
   }
+  /* Me ahora hize yo todo, ese dante catini se paso che */
 }
 </style>

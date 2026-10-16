@@ -1,59 +1,62 @@
 <script setup>
-import AppIcon from './Appicon.vue'
+import { computed } from 'vue'
+import StatCard from './StatCard.vue'
+import TutoriasTable from './TutoriasTable.vue'
 
 defineProps({
-  title: {
-    type: String,
-    required: true
-  }
+  userName: { type: String, default: 'Administrador' }
 })
+
+// Datos de ejemplo: reemplazar por la respuesta real de tu API/backend.
+const tutorias = [
+  { id: 1, materia: 'Matemáticas', profesor: 'Laura Vera', curso: '5to A', horario: 'Lunes 19:00', estado: 'Activa' },
+  { id: 2, materia: 'Lengua y Literatura', profesor: 'Martín Cabrera', curso: '4to B', horario: 'Martes 18:00', estado: 'Activa' },
+  { id: 3, materia: 'Física', profesor: 'Sofía Ibarra', curso: '6to A', horario: 'Miércoles 17:30', estado: 'Pendiente' },
+  { id: 4, materia: 'Química', profesor: 'Diego Molina', curso: '5to B', horario: 'Jueves 19:00', estado: 'Activa' },
+  { id: 5, materia: 'Historia', profesor: 'Ana Torres', curso: '3ro A', horario: 'Viernes 18:30', estado: 'Finalizada' }
+]
+
+const profesoresActivos = computed(() =>
+  String(new Set(tutorias.map((t) => t.profesor)).size).padStart(2, '0')
+)
+const tutoriasActivas = computed(() =>
+  String(tutorias.filter((t) => t.estado === 'Activa').length).padStart(2, '0')
+)
 </script>
 
 <template>
-  <div class="placeholder">
-    <span class="placeholder__icon">
-      <AppIcon name="archive" :size="26" />
-    </span>
-    <h2>{{ title }}</h2>
-    <p>Esta sección todavía no tiene una vista propia. Se va a completar en una próxima etapa.</p>
+  <div class="dashboard">
+    <header class="dashboard__intro">
+      <h1>Panel principal</h1>
+      <p>Bienvenido, <strong>{{ userName }}</strong></p>
+    </header>
+
+    <div class="dashboard__stats">
+      <StatCard icon="idcard" :value="profesoresActivos" label="Profesores activos" />
+      <StatCard icon="users" :value="tutoriasActivas" label="Tutorías activas" />
+    </div>
+
+    <TutoriasTable :tutorias="tutorias" />
   </div>
 </template>
 
 <style scoped>
-.placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.6rem;
-  max-width: 480px;
-  padding: 2.5rem 2rem;
-  background: var(--color-paper-raised);
-  border: 1px dashed var(--color-line);
-  border-radius: 14px;
-}
-
-.placeholder__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: var(--color-neutral-bg);
-  color: var(--color-neutral);
-}
-
-.placeholder h2 {
-  margin: 0;
+.dashboard__intro h1 {
+  margin: 0 0 0.2rem;
   font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-size: clamp(1.5rem, 2vw, 1.9rem);
   color: var(--color-ink);
 }
-
-.placeholder p {
+.dashboard__intro p {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.dashboard__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
 }
 </style>

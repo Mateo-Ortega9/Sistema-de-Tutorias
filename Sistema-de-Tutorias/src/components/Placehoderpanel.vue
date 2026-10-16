@@ -2,20 +2,15 @@
 import AppIcon from './Appicon.vue'
 
 defineProps({
-  title: {
-    type: String,
-    required: true
-  }
+  title: { type: String, required: true }
 })
 </script>
 
 <template>
   <div class="placeholder">
-    <span class="placeholder__icon">
-      <AppIcon name="archive" :size="26" />
-    </span>
-    <h2>{{ title }}</h2>
-    <p>Esta sección todavía no tiene una vista propia. Se va a completar en una próxima etapa.</p>
+    <AppIcon name="folder" :size="34" />
+    <h1>{{ title }}</h1>
+    <p>Esta sección todavía no tiene contenido cargado. Elegí "Panel Principal" para ver el resumen general.</p>
   </div>
 </template>
 
@@ -26,34 +21,21 @@ defineProps({
   align-items: flex-start;
   gap: 0.6rem;
   max-width: 480px;
-  padding: 2.5rem 2rem;
-  background: var(--color-paper-raised);
-  border: 1px dashed var(--color-line);
-  border-radius: 14px;
+  margin-top: 2rem;
+  color: var(--color-text-muted);
 }
-
-.placeholder__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: var(--color-neutral-bg);
-  color: var(--color-neutral);
+.placeholder svg {
+  color: var(--color-accent-deep);
 }
-
-.placeholder h2 {
+.placeholder h1 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.25rem;
   color: var(--color-ink);
+  font-size: 1.4rem;
 }
-
 .placeholder p {
   margin: 0;
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   line-height: 1.5;
 }
 </style>

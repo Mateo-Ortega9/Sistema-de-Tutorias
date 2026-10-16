@@ -1,158 +1,247 @@
 <script setup>
-import AppIcon from './AppIcon.vue'
+import { reactive } from 'vue'
+import AppIcon from './Appicon.vue'
 
-defineProps({
-  activeId: {
-    type: String,
-    required: true
-  },
-  open: {
-    type: Boolean,
-    default: false
-  }
+const props = defineProps({
+  activeId: { type: String, required: true },
+  open: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['select', 'close', 'logout'])
 
-// Mismo set de ids que sectionTitles en App.vue.
-const items = [
-  { id: 'panel-principal', label: 'Panel Principal', icon: 'home' },
-  { id: 'profesores', label: 'Profesores', icon: 'teacher' },
-  { id: 'cursos', label: 'Cursos', icon: 'book' },
-  { id: 'tutorias', label: 'Tutorías', icon: 'calendar' },
-  { id: 'estudiantes', label: 'Estudiantes', icon: 'students' },
-  { id: 'sesiones', label: 'Sesiones', icon: 'clock' },
-  { id: 'registros', label: 'Registros', icon: 'archive' },
-  { id: 'configuracion', label: 'Configuración', icon: 'settings' }
+const sections = [
+  {
+    title: null,
+    items: [{ id: 'panel-principal', label: 'Panel Principal', icon: 'grid' }]
+  },
+  {
+    title: 'Gestión',
+    items: [
+      { id: 'profesores', label: 'Profesores', icon: 'user', children: ['Ver todos', 'Agregar profesor'] },
+      { id: 'cursos', label: 'Cursos', icon: 'folder', children: ['Ver todos', 'Nuevo curso'] },
+      { id: 'tutorias', label: 'Tutorías', icon: 'users' },
+      { id: 'estudiantes', label: 'Estudiantes', icon: 'users2', children: ['Ver todos', 'Nuevo estudiante'] }
+    ]
+  },
+  {
+    title: 'Seguimiento',
+    items: [
+      { id: 'sesiones', label: 'Sesiones', icon: 'calendar', children: ['Próximas', 'Historial'] },
+      { id: 'registros', label: 'Registros', icon: 'chart', children: ['Asistencia', 'Evaluaciones'] }
+    ]
+  }
 ]
 
-function select(id) {
-  emit('select', id)
+const expanded = reactive({})
+
+function toggleItem(item) {
+  emit('select', item.id)
+  if (item.children) {
+    expanded[item.id] = !expanded[item.id]
+  } else {
+    emit('close')
+  }
+}
+
+function selectChild(item, child) {
+  // El id se mantiene en el padre; se podría reemplazar por una ruta propia por hijo.
+  emit('select', item.id)
   emit('close')
 }
 </script>
 
 <template>
-  <div>
-    <div v-if="open" class="sidebar-backdrop" @click="emit('close')" />
+  <transition name="backdrop-fade">
+    <div v-if="open" class="backdrop" @click="emit('close')"></div>
+  </transition>
 
-    <aside class="sidebar" :class="{ 'sidebar--open': open }">
-      <nav class="sidebar__nav">
-        <button
-          v-for="item in items"
-          :key="item.id"
-          type="button"
-          class="sidebar__item"
-          :class="{ 'sidebar__item--active': item.id === activeId }"
-          @click="select(item.id)"
-        >
-          <AppIcon :name="item.icon" :size="19" />
-          <span>{{ item.label }}</span>
-        </button>
-      </nav>
+  <aside class="sidebar" :class="{ 'sidebar--open': open }">
+    <nav class="nav" aria-label="Navegación principal">
+      <div v-for="(section, i) in sections" :key="i" class="nav-section">
+        <p v-if="section.title" class="nav-section__title">{{ section.title }}</p>
 
-      <button type="button" class="sidebar__logout" @click="emit('logout')">
-        <AppIcon name="logout" :size="19" />
-        <span>Cerrar sesión</span>
+        <div v-for="item in section.items" :key="item.id" class="nav-item">
+          <button
+            type="button"
+            class="nav-item__btn"
+            :class="{ 'nav-item__btn--active': activeId === item.id }"
+            @click="toggleItem(item)"
+          >
+            <AppIcon :name="item.icon" :size="19" />
+            <span class="nav-item__label">{{ item.label }}</span>
+            <AppIcon
+              v-if="item.children"
+              name="chevron"
+              :size="16"
+              class="nav-item__chevron"
+              :class="{ 'nav-item__chevron--open': expanded[item.id] }"
+            />
+          </button>
+
+          <ul v-if="item.children && expanded[item.id]" class="nav-submenu">
+            <li v-for="child in item.children" :key="child">
+              <button type="button" class="nav-submenu__btn" @click="selectChild(item, child)">
+                {{ child }}
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar__footer">
+      <button
+        type="button"
+        class="nav-item__btn"
+        :class="{ 'nav-item__btn--active': activeId === 'configuracion' }"
+        @click="toggleItem({ id: 'configuracion' })"
+      >
+        <AppIcon name="settings" :size="19" />
+        <span class="nav-item__label">Configuración</span>
       </button>
-    </aside>
-  </div>
+      <button type="button" class="nav-item__btn nav-item__btn--danger" @click="emit('logout')">
+        <AppIcon name="logout" :size="19" />
+        <span class="nav-item__label">Cerrar sesión</span>
+      </button>
+    </div>
+  </aside>
 </template>
 
 <style scoped>
-.sidebar-backdrop {
-  display: none;
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 14, 24, 0.45);
+  z-index: 40;
+}
+.backdrop-fade-enter-active,
+.backdrop-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.backdrop-fade-enter-from,
+.backdrop-fade-leave-to {
+  opacity: 0;
 }
 
 .sidebar {
-  grid-row: 1;
-  grid-column: 1;
+  width: 272px;
+  background: var(--color-ink);
+  color: #cdd3e0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
-  padding: 1.25rem 0.9rem;
-  background: var(--color-paper-raised);
-  border-right: 1px solid var(--color-line);
+  padding: 1rem 0.85rem 1.25rem;
   overflow-y: auto;
+  border-right: 1px solid var(--color-ink-line);
 }
 
-.sidebar__nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+.nav-section {
+  margin-bottom: 0.35rem;
+}
+.nav-section__title {
+  margin: 1.1rem 0.6rem 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7c88a3;
+}
+.nav-section:first-child .nav-section__title {
+  margin-top: 0.2rem;
 }
 
-.sidebar__item {
+.nav-item__btn {
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.6rem 0.75rem;
+  gap: 0.7rem;
+  padding: 0.6rem 0.7rem;
   border: none;
   border-radius: 10px;
   background: transparent;
-  color: var(--color-text-muted);
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  text-align: left;
+  color: inherit;
+  font: inherit;
+  font-size: 0.88rem;
   cursor: pointer;
+  text-align: left;
   transition: background 0.15s ease, color 0.15s ease;
 }
-
-.sidebar__item:hover {
-  background: var(--color-neutral-bg);
-  color: var(--color-text);
+.nav-item__btn:hover {
+  background: var(--color-ink-soft);
+  color: #fff;
 }
-
-.sidebar__item--active {
+.nav-item__btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+.nav-item__btn--active {
   background: var(--color-accent-soft);
-  color: var(--color-accent-deep);
+  color: var(--color-ink);
   font-weight: 600;
 }
 
-.sidebar__logout {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.6rem 0.75rem;
-  border: none;
-  border-top: 1px solid var(--color-line);
-  border-radius: 0;
-  background: transparent;
-  color: var(--color-text-muted);
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: color 0.15s ease;
+.nav-item__label {
+  flex: 1;
+}
+.nav-item__chevron {
+  color: #7c88a3;
+  transition: transform 0.18s ease;
+}
+.nav-item__chevron--open {
+  transform: rotate(180deg);
 }
 
-.sidebar__logout:hover {
-  color: var(--color-teal-deep);
+.nav-submenu {
+  list-style: none;
+  margin: 0.15rem 0 0.4rem;
+  padding-left: 2.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.nav-submenu__btn {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: #9aa4bb;
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.nav-submenu__btn:hover {
+  background: var(--color-ink-soft);
+  color: #fff;
+}
+
+.sidebar__footer {
+  border-top: 1px solid var(--color-ink-line);
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.nav-item__btn--danger:hover {
+  background: #3a1f24;
+  color: #f3a9ad;
 }
 
 @media (max-width: 900px) {
   .sidebar {
     position: fixed;
-    inset: var(--header-height) 0 0 0;
-    width: 78%;
-    max-width: 300px;
-    z-index: 30;
+    top: var(--header-height);
+    left: 0;
+    bottom: 0;
+    z-index: 50;
     transform: translateX(-100%);
-    transition: transform 0.2s ease;
-    box-shadow: 2px 0 16px rgba(18, 60, 75, 0.15);
+    transition: transform 0.22s ease;
+    box-shadow: 8px 0 24px rgba(0, 0, 0, 0.25);
   }
-
   .sidebar--open {
     transform: translateX(0);
-  }
-
-  .sidebar-backdrop {
-    display: block;
-    position: fixed;
-    inset: var(--header-height) 0 0 0;
-    z-index: 20;
-    background: rgba(18, 60, 75, 0.35);
   }
 }
 </style>
