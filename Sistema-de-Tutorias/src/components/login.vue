@@ -27,7 +27,7 @@
             Profesor
           </option>
 
-          <option value="administrador">
+          <option value="administracion">
             Administración
           </option>
         </select>
@@ -167,7 +167,7 @@ const iniciarSesion = () => {
   if (formulario.rol === 'profesor') {
     router.push('/filtros')
   } else {
-    router.push('/admin')
+    router.push('/')
   }
 }
 
