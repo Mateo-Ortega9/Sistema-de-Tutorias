@@ -114,7 +114,7 @@
               Seleccioná una opción
             </option>
 
-            <option value="administrador">
+            <option value="administración">
               administrador
             </option>
 
