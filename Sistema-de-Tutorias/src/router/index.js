@@ -8,7 +8,6 @@ import EnviarTutoria from '../components/EnviarTutoria.vue'
 import Login from '../components/login.vue'
 import Register from '../components/register.vue'
 import Recuperar from '../components/recuperar.vue'
-import Adminpanel from '../components/Adminpanel.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -50,29 +49,11 @@ const router = createRouter({
       component: EnviarTutoria
     },
     {
-      path: '/admin',
-      name: 'admin',
-      component: Adminpanel,
-      meta: { requiereAdmin: true }
-    },
-    {
       path: '/hello',
       name: 'hello',
       component: HelloWorld
     }
   ]
-})
-
-// Solo un administrador logueado puede entrar a /admin
-router.beforeEach((to) => {
-  if (to.meta.requiereAdmin) {
-    const usuario = JSON.parse(localStorage.getItem('usuarioActual') || 'null')
-    const rol = String(usuario?.rol || usuario?.tipo || '').toLowerCase()
-
-    if (rol !== 'administrador') {
-      return '/login'
-    }
-  }
 })
 
 export default router
