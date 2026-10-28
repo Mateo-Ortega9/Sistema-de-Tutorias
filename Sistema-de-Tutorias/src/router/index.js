@@ -8,6 +8,7 @@ import EnviarTutoria from '../components/EnviarTutoria.vue'
 import Login from '../components/login.vue'
 import Register from '../components/register.vue'
 import Recuperar from '../components/recuperar.vue'
+import Admin from '../components/Admin.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -39,9 +40,16 @@ const router = createRouter({
       component: ListasDeEstudiantes
     },
     {
+      path: '/admin',
+      name: 'admin',
+      component: Admin,
+      meta: { requiereSesion: true, rol: 'administracion' }
+    },
+    {
       path: '/filtros',
       name: 'filtros',
-      component: Filtros
+      component: Filtros,
+      meta: { requiereSesion: true, rol: 'profesor' }
     },
     {
       path: '/enviar-tutoria',
@@ -54,6 +62,32 @@ const router = createRouter({
       component: HelloWorld
     }
   ]
+})
+
+router.beforeEach((to) => {
+  const usuario = JSON.parse(
+    localStorage.getItem('usuarioActual') || 'null'
+  )
+  const rol = String(usuario?.rol || usuario?.tipo || '')
+    .trim()
+    .toLowerCase()
+
+  if (to.meta.requiereSesion && !usuario) {
+    return '/login'
+  }
+
+  if (to.meta.rol === 'profesor' && rol !== 'profesor') {
+    return rol === 'administrador' || rol === 'administracion'
+      ? '/admin'
+      : '/login'
+  }
+
+  if (to.meta.rol === 'administracion' &&
+      !['administrador', 'administracion'].includes(rol)) {
+    return rol === 'profesor' ? '/filtros' : '/login'
+  }
+
+  return true
 })
 
 export default router
