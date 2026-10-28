@@ -114,8 +114,8 @@
               Seleccioná una opción
             </option>
 
-            <option value="administrador">
-              administrador
+            <option value="administracion">
+              Administración
             </option>
 
             <option value="profesor">
@@ -216,7 +216,7 @@ const registrarse = () => {
   // Verificar tipo de usuario
   if (!tipo) {
     alert(
-      'Seleccioná si sos alumno o tutor.'
+      'Seleccioná Profesor o Administración.'
     )
     return
   }
