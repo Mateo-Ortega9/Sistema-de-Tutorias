@@ -63,6 +63,24 @@
           <span>✉</span>
           Tutorías
         </button>
+
+        <button
+          type="button"
+          :class="{ activo: vista === 'reportes' }"
+          @click="vista = 'reportes'"
+        >
+          <span>▥</span>
+          Reportes
+        </button>
+
+        <button
+          type="button"
+          :class="{ activo: vista === 'notificaciones' }"
+          @click="vista = 'notificaciones'"
+        >
+          <span>♢</span>
+          Notificaciones
+        </button>
       </nav>
 
       <div class="sidebar-bottom">
@@ -413,6 +431,77 @@
           </div>
           <p v-else class="empty">Agregá eventos desde la sección Agenda para ver el seguimiento.</p>
         </section>
+        <section v-if="vista === 'reportes'" class="panel-card full-panel">
+          <div class="section-heading">
+            <div>
+              <h2>Reportes del sistema</h2>
+              <p>Consultá el estado general y descargá la información local.</p>
+            </div>
+            <div class="report-actions">
+              <button type="button" class="secondary-button" @click="imprimirReporte">🖨 Imprimir</button>
+              <button type="button" class="primary-button" @click="exportarCSV">↓ Exportar CSV</button>
+            </div>
+          </div>
+
+          <div class="report-cards">
+            <div class="report-card">
+              <span>Usuarios</span>
+              <strong>{{ usuarios.length }}</strong>
+              <small>{{ profesores }} profesores activos</small>
+            </div>
+            <div class="report-card">
+              <span>Estudiantes</span>
+              <strong>{{ estudiantes.length }}</strong>
+              <small>{{ cursos.length }} cursos disponibles</small>
+            </div>
+            <div class="report-card">
+              <span>Agenda</span>
+              <strong>{{ eventosOrdenados.length }}</strong>
+              <small>tutorías programadas</small>
+            </div>
+          </div>
+
+          <h3 class="subheading">Estudiantes por curso</h3>
+          <div class="report-table">
+            <div class="report-row report-header">
+              <span>Curso</span>
+              <span>Estudiantes</span>
+              <span>Materias</span>
+            </div>
+            <div v-for="curso in resumenCursos" :key="curso.nombre" class="report-row">
+              <strong>{{ curso.nombre }}</strong>
+              <span>{{ curso.estudiantes }}</span>
+              <span>{{ curso.materias.map(nombreMateria).join(", ") }}</span>
+            </div>
+          </div>
+        </section>
+
+        <section v-if="vista === 'notificaciones'" class="panel-card full-panel">
+          <div class="section-heading">
+            <div>
+              <h2>Notificaciones</h2>
+              <p>Información importante sobre la actividad del sistema.</p>
+            </div>
+          </div>
+
+          <div v-if="notificaciones.length" class="notification-list">
+            <article v-for="notificacion in notificaciones" :key="notificacion.id" class="notification-card">
+              <div class="notification-icon">{{ notificacion.icono }}</div>
+              <div>
+                <strong>{{ notificacion.titulo }}</strong>
+                <p>{{ notificacion.texto }}</p>
+              </div>
+              <span class="notification-date">{{ notificacion.fecha }}</span>
+            </article>
+          </div>
+
+          <div v-else class="notification-empty">
+            <span>✓</span>
+            <strong>Todo está al día</strong>
+            <p>No hay notificaciones pendientes.</p>
+          </div>
+        </section>
+
       </main>
     </div>
 
@@ -573,7 +662,9 @@ const tituloVista = computed(() => ({
   estudiantes: "Estudiantes",
   cursos: "Cursos y materias",
   agenda: "Agenda de tutorías",
-  tutorias: "Seguimiento de tutorías"
+  tutorias: "Seguimiento de tutorías",
+  reportes: "Reportes",
+  notificaciones: "Notificaciones"
 }[vista.value]));
 
 const resumenCursos = computed(() =>
@@ -592,6 +683,42 @@ const eventosOrdenados = computed(() =>
     `${a.fecha} ${a.hora}`.localeCompare(`${b.fecha} ${b.hora}`)
   )
 );
+
+const notificaciones = computed(() => {
+  const avisos = [];
+
+  if (eventosOrdenados.value.length) {
+    avisos.push({
+      id: "agenda",
+      icono: "◷",
+      titulo: "Hay tutorías programadas",
+      texto: `${eventosOrdenados.value.length} evento(s) cargado(s) en la agenda.`,
+      fecha: "Agenda"
+    });
+  }
+
+  if (usuarios.value.length === 0) {
+    avisos.push({
+      id: "usuarios",
+      icono: "!",
+      titulo: "No hay usuarios registrados",
+      texto: "Creá al menos un usuario para comenzar a usar el sistema.",
+      fecha: "Atención"
+    });
+  }
+
+  if (estudiantes.length) {
+    avisos.push({
+      id: "estudiantes",
+      icono: "♧",
+      titulo: "Listado de estudiantes disponible",
+      texto: `${estudiantes.length} estudiantes están disponibles para consultar.`,
+      fecha: "Sistema"
+    });
+  }
+
+  return avisos;
+});
 
 const iniciales = usuario =>
   [usuario.nombre, usuario.apellido]
@@ -672,6 +799,32 @@ const crearUsuario = () => {
   localStorage.setItem("usuariosPROA", JSON.stringify(usuarios.value));
   mostrarNuevoUsuario.value = false;
   alert("Usuario creado correctamente.");
+};
+
+const exportarCSV = () => {
+  const filas = [
+    ["Nombre", "Apellido", "Correo", "Rol"],
+    ...usuarios.value.map(usuario => [
+      usuario.nombre || "",
+      usuario.apellido || "",
+      usuario.email || "",
+      etiquetaRol(usuario)
+    ])
+  ];
+
+  const csv = filas
+    .map(fila => fila.map(valor => `"${String(valor).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+
+  const enlace = document.createElement("a");
+  enlace.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+  enlace.download = "usuarios-proa.csv";
+  enlace.click();
+  URL.revokeObjectURL(enlace.href);
+};
+
+const imprimirReporte = () => {
+  window.print();
 };
 
 const irAProfesor = () => {
@@ -1417,6 +1570,137 @@ td {
   text-align: center;
 }
 
+.report-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.report-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 26px 0;
+}
+
+.report-card {
+  padding: 18px;
+  border-radius: 11px;
+  background: #f5f7ff;
+}
+
+.report-card span,
+.report-card strong,
+.report-card small {
+  display: block;
+}
+
+.report-card span,
+.report-card small {
+  color: #7b8499;
+  font-size: 12px;
+}
+
+.report-card strong {
+  margin: 8px 0 4px;
+  color: #4f46e5;
+  font-size: 28px;
+}
+
+.subheading {
+  margin: 25px 0 10px;
+}
+
+.report-table {
+  border-top: 1px solid #eef0f5;
+}
+
+.report-row {
+  display: grid;
+  grid-template-columns: 1fr 150px 2fr;
+  gap: 15px;
+  padding: 13px 0;
+  border-bottom: 1px solid #eef0f5;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.report-header {
+  color: #7b8499;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.notification-card {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid #eef0f5;
+  border-radius: 11px;
+}
+
+.notification-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-weight: 800;
+}
+
+.notification-card strong,
+.notification-card p {
+  display: block;
+}
+
+.notification-card p {
+  margin: 4px 0 0;
+  color: #7b8499;
+  font-size: 13px;
+}
+
+.notification-date {
+  margin-left: auto;
+  color: #7b8499;
+  font-size: 11px;
+}
+
+.notification-empty {
+  padding: 55px 10px;
+  text-align: center;
+}
+
+.notification-empty > span {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  place-items: center;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 24px;
+}
+
+.notification-empty strong {
+  display: block;
+}
+
+.notification-empty p {
+  margin: 6px 0 0;
+  color: #7b8499;
+}
+
 .modal-background {
   position: fixed;
   inset: 0;
@@ -1526,7 +1810,8 @@ td {
   .stats,
   .student-grid,
   .course-grid,
-  .agenda-layout {
+  .agenda-layout,
+  .report-cards {
     grid-template-columns: 1fr;
   }
 
@@ -1540,8 +1825,32 @@ td {
     width: 100%;
   }
 
-  .tutoria-summary {
+  .tutoria-summary,
+  .report-cards {
     grid-template-columns: 1fr;
+  }
+
+  .report-actions {
+    width: 100%;
+  }
+
+  .report-actions button {
+    flex: 1;
+  }
+
+  .report-row {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .notification-card {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .notification-date {
+    width: 100%;
+    margin-left: 51px;
   }
 
   .filters,
