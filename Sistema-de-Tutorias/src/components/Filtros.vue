@@ -152,6 +152,14 @@
               Programación
             </option>
 
+            <option value="geografia">
+              Geografía
+            </option>
+
+            <option value="historia">
+              Historia
+            </option>
+
           </select>
 
         </div>
@@ -492,7 +500,9 @@ export default {
         { valor: "matematica", nombre: "Matemática" },
         { valor: "lengua", nombre: "Lengua" },
         { valor: "ingles", nombre: "Inglés" },
-        { valor: "programacion", nombre: "Programación" }
+        { valor: "programacion", nombre: "Programación" },
+        { valor: "geografia", nombre: "Geografía" },
+        { valor: "historia", nombre: "Historia" }
       ],
 
       dias: [
