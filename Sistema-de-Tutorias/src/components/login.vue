@@ -140,7 +140,10 @@ const iniciarSesion = () => {
   // Buscar usuario profesor registrado
   const usuario = usuarios.find(usuario => {
     const emailUsuario = String(usuario.email || '').trim().toLowerCase()
-    const rolUsuario = String(usuario.rol || usuario.tipo || '').trim().toLowerCase()
+    const rolOriginal = String(usuario.rol || usuario.tipo || '').trim().toLowerCase()
+    const rolUsuario = rolOriginal === 'administrador'
+      ? 'administracion'
+      : rolOriginal
 
     return emailUsuario === email &&
       usuario.password === formulario.password &&
