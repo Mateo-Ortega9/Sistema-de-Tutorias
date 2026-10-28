@@ -5,11 +5,21 @@
     <header class="topbar">
 
       <div class="top-left">
-        <button class="icon-button">
+        <button
+          class="icon-button"
+          type="button"
+          aria-label="Mostrar menú"
+          @click="alternarSidebar"
+        >
           ☰
         </button>
 
-        <button class="icon-button">
+        <button
+          class="icon-button"
+          type="button"
+          aria-label="Ir al inicio del profesor"
+          @click="irInicio"
+        >
           🏠
         </button>
       </div>
@@ -83,7 +93,7 @@
     <div class="layout">
 
       <!-- MENÚ LATERAL -->
-      <aside class="sidebar">
+      <aside class="sidebar" :class="{ oculto: !mostrarSidebar }">
 
         <div class="filtro">
 
@@ -266,6 +276,7 @@
             v-if="vista === 'estudiantes' || vista === 'calendario'"
             :curso="cursoSeleccionado"
             :materia="materiaSeleccionada"
+            :estudiantes="estudiantesFiltrados"
           />
 
         </section>
@@ -291,7 +302,7 @@
           ✕
         </button>
 
-        <EnviarTutoria />
+        <EnviarTutoria :estudiantes="estudiantesFiltrados" />
 
       </div>
 
@@ -442,6 +453,7 @@
 
 <script>
 import ListasDeEstudiantes from "./ListasDeEstudiantes.vue";
+import ESTUDIANTES from "../data/estudiantes";
 import EnviarTutoria from "./EnviarTutoria.vue";
 
 export default {
@@ -465,12 +477,13 @@ export default {
       mostrarEnviar: false,
       mostrarPerfil: false,
       mostrarEditorPerfil: false,
+      mostrarSidebar: true,
 
       perfil: {
         nombre: "",
         apellido: "",
         email: "",
-        materia: "todas",
+        materia: "matematica",
         descripcion: "",
         foto: ""
       },
@@ -506,7 +519,7 @@ export default {
         nombre: usuarioGuardado.nombre || "",
         apellido: usuarioGuardado.apellido || "",
         email: usuarioGuardado.email || "",
-        materia: usuarioGuardado.materia || "todas",
+        materia: usuarioGuardado.materia || "matematica",
         descripcion: usuarioGuardado.descripcion || "",
         foto: usuarioGuardado.foto || ""
       };
@@ -533,29 +546,7 @@ export default {
 
     estudiantesFiltrados() {
 
-      const estudiantes = [
-
-        {
-          curso: "1° año",
-          materia: "matematica"
-        },
-
-        {
-          curso: "1° año",
-          materia: "lengua"
-        },
-
-        {
-          curso: "2° año",
-          materia: "programacion"
-        },
-
-        {
-          curso: "3° año",
-          materia: "ingles"
-        }
-
-      ];
+      const estudiantes = ESTUDIANTES;
 
       return estudiantes.filter(estudiante => {
 
@@ -576,6 +567,16 @@ export default {
   },
 
   methods: {
+
+    alternarSidebar() {
+      this.mostrarSidebar = !this.mostrarSidebar;
+    },
+
+    irInicio() {
+      this.vista = "calendario";
+      this.materiaSeleccionada = "todas";
+      this.cursoSeleccionado = "todos";
+    },
 
     abrirEditorPerfil() {
       this.mostrarPerfil = false;
@@ -1059,6 +1060,10 @@ export default {
   font-size: 14px;
 }
 
+
+.sidebar.oculto {
+  display: none;
+}
 
 /* NAVEGACIÓN */
 
