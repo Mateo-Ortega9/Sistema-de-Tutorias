@@ -32,7 +32,7 @@
               Profesor
             </option>
 
-            <option value="administrador">
+            <option value="administracion">
               Administración
             </option>
 
@@ -136,15 +136,14 @@ const recuperar = () => {
 
 
   // Buscar usuario
-  const usuario = usuarios.find(
+  const usuario = usuarios.find(usuario => {
+    const rolUsuario = String(usuario.rol || usuario.tipo || '')
+      .trim()
+      .toLowerCase()
 
-    usuario =>
-
-      usuario.email === correo &&
-
-      usuario.tipo === tipo.value
-
-  )
+    return String(usuario.email || '').trim().toLowerCase() === correo &&
+      rolUsuario === tipo.value
+  })
 
 
   if (!usuario) {
