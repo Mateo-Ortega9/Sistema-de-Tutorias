@@ -36,6 +36,33 @@
           <span>♧</span>
           Estudiantes
         </button>
+
+        <button
+          type="button"
+          :class="{ activo: vista === 'cursos' }"
+          @click="vista = 'cursos'"
+        >
+          <span>▤</span>
+          Cursos
+        </button>
+
+        <button
+          type="button"
+          :class="{ activo: vista === 'agenda' }"
+          @click="vista = 'agenda'"
+        >
+          <span>◷</span>
+          Agenda
+        </button>
+
+        <button
+          type="button"
+          :class="{ activo: vista === 'tutorias' }"
+          @click="vista = 'tutorias'"
+        >
+          <span>✉</span>
+          Tutorías
+        </button>
       </nav>
 
       <div class="sidebar-bottom">
@@ -263,6 +290,129 @@
 
           <p v-else class="empty">No encontramos estudiantes con esos filtros.</p>
         </section>
+
+        <section v-if="vista === 'cursos'" class="panel-card full-panel">
+          <div class="section-heading">
+            <div>
+              <h2>Cursos y materias</h2>
+              <p>Resumen de estudiantes agrupados por curso.</p>
+            </div>
+          </div>
+
+          <div class="course-grid">
+            <article v-for="curso in resumenCursos" :key="curso.nombre" class="course-card">
+              <div class="course-heading">
+                <div class="course-icon">⌂</div>
+                <div>
+                  <h3>{{ curso.nombre }}</h3>
+                  <span>{{ curso.estudiantes }} estudiantes</span>
+                </div>
+              </div>
+              <div class="subject-list">
+                <span v-for="materia in curso.materias" :key="materia" class="subject-tag">
+                  {{ nombreMateria(materia) }}
+                </span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section v-if="vista === 'agenda'" class="agenda-layout">
+          <section class="panel-card">
+            <div class="section-heading">
+              <div>
+                <h2>Agenda de tutorías</h2>
+                <p>Organizá reuniones y horarios de atención.</p>
+              </div>
+            </div>
+
+            <form class="agenda-form" @submit.prevent="agregarEvento">
+              <label>
+                Fecha
+                <input v-model="nuevoEvento.fecha" type="date" required />
+              </label>
+              <label>
+                Hora
+                <input v-model="nuevoEvento.hora" type="time" required />
+              </label>
+              <label>
+                Materia
+                <select v-model="nuevoEvento.materia" required>
+                  <option v-for="materia in materiasDisponibles" :key="materia.valor" :value="materia.valor">
+                    {{ materia.nombre }}
+                  </option>
+                </select>
+              </label>
+              <label>
+                Curso
+                <select v-model="nuevoEvento.curso" required>
+                  <option v-for="curso in cursos" :key="curso" :value="curso">{{ curso }}</option>
+                </select>
+              </label>
+              <label class="wide-field">
+                Estudiante
+                <select v-model="nuevoEvento.estudiante" required>
+                  <option value="" disabled>Seleccioná un estudiante</option>
+                  <option v-for="estudiante in estudiantes" :key="estudiante.id" :value="estudiante.nombre">
+                    {{ estudiante.nombre }}
+                  </option>
+                </select>
+              </label>
+              <button type="submit" class="primary-button wide-button">+ Agregar a la agenda</button>
+            </form>
+          </section>
+
+          <section class="panel-card agenda-list-card">
+            <div class="panel-heading">
+              <div>
+                <h3>Próximas actividades</h3>
+                <p>{{ eventosOrdenados.length }} evento(s) cargado(s)</p>
+              </div>
+            </div>
+
+            <div v-if="eventosOrdenados.length" class="agenda-list">
+              <article v-for="evento in eventosOrdenados" :key="evento.id" class="agenda-event">
+                <div class="date-box">
+                  <strong>{{ diaEvento(evento.fecha) }}</strong>
+                  <span>{{ mesEvento(evento.fecha) }}</span>
+                </div>
+                <div class="event-data">
+                  <strong>{{ evento.hora }} · {{ nombreMateria(evento.materia) }}</strong>
+                  <span>{{ evento.estudiante }} · {{ evento.curso }}</span>
+                </div>
+                <button type="button" class="delete-event" @click="eliminarEvento(evento.id)">✕</button>
+              </article>
+            </div>
+            <p v-else class="empty">Todavía no hay eventos en la agenda.</p>
+          </section>
+        </section>
+
+        <section v-if="vista === 'tutorias'" class="panel-card full-panel">
+          <div class="section-heading">
+            <div>
+              <h2>Seguimiento de tutorías</h2>
+              <p>Controlá las tutorías programadas desde la agenda.</p>
+            </div>
+          </div>
+
+          <div class="tutoria-summary">
+            <div><strong>{{ eventosOrdenados.length }}</strong><span>Programadas</span></div>
+            <div><strong>{{ estudiantes.length }}</strong><span>Estudiantes disponibles</span></div>
+            <div><strong>{{ profesores }}</strong><span>Profesores activos</span></div>
+          </div>
+
+          <div v-if="eventosOrdenados.length" class="tutoria-table">
+            <div v-for="evento in eventosOrdenados" :key="evento.id" class="tutoria-row">
+              <span class="status-dot"></span>
+              <div>
+                <strong>{{ evento.estudiante }}</strong>
+                <small>{{ evento.fecha }} · {{ evento.hora }} · {{ nombreMateria(evento.materia) }}</small>
+              </div>
+              <span class="role-badge">{{ evento.curso }}</span>
+            </div>
+          </div>
+          <p v-else class="empty">Agregá eventos desde la sección Agenda para ver el seguimiento.</p>
+        </section>
       </main>
     </div>
 
@@ -324,6 +474,7 @@ const router = useRouter();
 const usuarioActual = JSON.parse(localStorage.getItem("usuarioActual") || "null");
 const usuarios = ref(JSON.parse(localStorage.getItem("usuariosPROA") || "[]"));
 const estudiantes = ESTUDIANTES;
+const agenda = ref(JSON.parse(localStorage.getItem("agendaTutorias") || "[]"));
 
 const vista = ref("resumen");
 const menuAbierto = ref(true);
@@ -333,6 +484,14 @@ const filtroRol = ref("todos");
 const busquedaEstudiantes = ref("");
 const filtroCurso = ref("todos");
 const filtroMateria = ref("todas");
+
+const nuevoEvento = ref({
+  fecha: "",
+  hora: "",
+  materia: "matematica",
+  curso: "1° año",
+  estudiante: ""
+});
 
 const nuevoUsuario = ref({
   nombre: "",
@@ -411,8 +570,28 @@ const inicialesAdmin = computed(() =>
 const tituloVista = computed(() => ({
   resumen: "Resumen general",
   usuarios: "Usuarios",
-  estudiantes: "Estudiantes"
+  estudiantes: "Estudiantes",
+  cursos: "Cursos y materias",
+  agenda: "Agenda de tutorías",
+  tutorias: "Seguimiento de tutorías"
 }[vista.value]));
+
+const resumenCursos = computed(() =>
+  cursos.value.map(nombre => {
+    const estudiantesCurso = estudiantes.filter(estudiante => estudiante.curso === nombre);
+    return {
+      nombre,
+      estudiantes: estudiantesCurso.length,
+      materias: [...new Set(estudiantesCurso.map(estudiante => estudiante.materia))]
+    };
+  })
+);
+
+const eventosOrdenados = computed(() =>
+  [...agenda.value].sort((a, b) =>
+    `${a.fecha} ${a.hora}`.localeCompare(`${b.fecha} ${b.hora}`)
+  )
+);
 
 const iniciales = usuario =>
   [usuario.nombre, usuario.apellido]
@@ -427,6 +606,33 @@ const etiquetaRol = usuario =>
 const nombreMateria = materia => {
   const encontrada = materiasDisponibles.find(item => item.valor === materia);
   return encontrada?.nombre || materia;
+};
+
+const diaEvento = fecha =>
+  new Date(`${fecha}T12:00:00`).toLocaleDateString("es-AR", { day: "2-digit" });
+
+const mesEvento = fecha =>
+  new Date(`${fecha}T12:00:00`).toLocaleDateString("es-AR", { month: "short" });
+
+const agregarEvento = () => {
+  agenda.value.push({
+    id: Date.now(),
+    ...nuevoEvento.value
+  });
+  localStorage.setItem("agendaTutorias", JSON.stringify(agenda.value));
+  nuevoEvento.value = {
+    fecha: "",
+    hora: "",
+    materia: "matematica",
+    curso: "1° año",
+    estudiante: ""
+  };
+  alert("Evento agregado a la agenda.");
+};
+
+const eliminarEvento = id => {
+  agenda.value = agenda.value.filter(evento => evento.id !== id);
+  localStorage.setItem("agendaTutorias", JSON.stringify(agenda.value));
 };
 
 const abrirNuevoUsuario = () => {
@@ -961,6 +1167,215 @@ td {
   font-size: 14px;
 }
 
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.course-card {
+  padding: 18px;
+  border: 1px solid #eef0f5;
+  border-radius: 12px;
+  background: #fbfcff;
+}
+
+.course-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.course-heading h3 {
+  margin: 0 0 4px;
+}
+
+.course-heading span {
+  color: #7b8499;
+  font-size: 12px;
+}
+
+.course-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #e0e7ff;
+  color: #4338ca;
+  font-size: 20px;
+}
+
+.subject-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.subject-tag {
+  padding: 5px 9px;
+  border-radius: 20px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.agenda-layout {
+  display: grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 20px;
+}
+
+.agenda-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.agenda-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.agenda-form input,
+.agenda-form select {
+  padding: 11px 12px;
+  border: 1px solid #d8ddea;
+  border-radius: 8px;
+  background: white;
+  color: #293044;
+  font: inherit;
+}
+
+.wide-field,
+.wide-button {
+  grid-column: span 2;
+}
+
+.agenda-list {
+  margin-top: 20px;
+}
+
+.agenda-event {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 0;
+  border-top: 1px solid #eef0f5;
+}
+
+.date-box {
+  width: 47px;
+  padding: 6px 3px;
+  border-radius: 8px;
+  background: #eef2ff;
+  color: #4338ca;
+  text-align: center;
+}
+
+.date-box strong,
+.date-box span {
+  display: block;
+}
+
+.date-box strong {
+  font-size: 17px;
+}
+
+.date-box span {
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.event-data {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.event-data span {
+  color: #7b8499;
+  font-size: 12px;
+}
+
+.delete-event {
+  border: 0;
+  background: transparent;
+  color: #9ca3af;
+  cursor: pointer;
+}
+
+.delete-event:hover {
+  color: #ef4444;
+}
+
+.tutoria-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 24px 0;
+}
+
+.tutoria-summary div {
+  padding: 18px;
+  border-radius: 11px;
+  background: #f5f7ff;
+}
+
+.tutoria-summary strong,
+.tutoria-summary span {
+  display: block;
+}
+
+.tutoria-summary strong {
+  color: #4f46e5;
+  font-size: 24px;
+}
+
+.tutoria-summary span {
+  margin-top: 4px;
+  color: #7b8499;
+  font-size: 12px;
+}
+
+.tutoria-table {
+  border-top: 1px solid #eef0f5;
+}
+
+.tutoria-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 14px 0;
+  border-bottom: 1px solid #eef0f5;
+}
+
+.tutoria-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.tutoria-row small {
+  color: #7b8499;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
 .student-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1109,7 +1524,23 @@ td {
   }
 
   .stats,
-  .student-grid {
+  .student-grid,
+  .course-grid,
+  .agenda-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .agenda-form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .wide-field,
+  .wide-button {
+    width: 100%;
+  }
+
+  .tutoria-summary {
     grid-template-columns: 1fr;
   }
 
