@@ -27,7 +27,7 @@
             Profesor
           </option>
 
-          <option value="administrador">
+          <option value="administracion">
             Administración
           </option>
         </select>
