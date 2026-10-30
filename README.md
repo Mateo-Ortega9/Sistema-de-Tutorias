@@ -84,7 +84,7 @@ El administrador puede:
 - **npm**
 - **localStorage** para persistencia local
 - **Git y GitHub** para control de versiones y colaboración
-
+- **chat gpt work** version luna 5.6 (medio) usado para mejorar codigo y solucionar problemas 
 ## Herramientas de trabajo
 
 - Visual Studio Code.
