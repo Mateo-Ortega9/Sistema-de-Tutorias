@@ -99,7 +99,7 @@ El administrador puede:
 ## Autores
 
 - **Mateo Ortega**
-- **Ariel Ruyz Diaz**
+- **Ariel RuizDiaz**
 - **Felipe Funes**
 
 ## Requisitos
