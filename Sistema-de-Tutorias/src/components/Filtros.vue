@@ -253,6 +253,43 @@
 
           </div>
 
+          <div class="estado-tutorias">
+            <div class="estado-tutorias-cabecera">
+              <div>
+                <h3>Tutorías guardadas</h3>
+                <p v-if="cargandoTutorias">Cargando tutorías...</p>
+                <p v-else-if="errorTutorias" class="error-tutorias">{{ errorTutorias }}</p>
+                <p v-else>{{ tutoriasFiltradas.length }} tutoría(s) encontradas · origen: {{ origenTutorias }}</p>
+              </div>
+
+              <button
+                type="button"
+                class="boton-recargar"
+                :disabled="cargandoTutorias"
+                @click="cargarTutorias"
+              >
+                ↻ Recargar
+              </button>
+            </div>
+
+            <div v-if="!cargandoTutorias && !errorTutorias && tutoriasFiltradas.length" class="tutorias-lista">
+              <article v-for="tutoria in tutoriasFiltradas" :key="tutoria.id" class="tutoria-item">
+                <div class="tutoria-dia">
+                  <strong>{{ tutoria.dia }}</strong>
+                  <small>{{ tutoria.horario }}</small>
+                </div>
+                <div>
+                  <strong>{{ tutoria.materia }}</strong>
+                  <span>{{ tutoria.estudiante }} · {{ tutoria.curso }}</span>
+                </div>
+              </article>
+            </div>
+
+            <p v-else-if="!cargandoTutorias && !errorTutorias" class="sin-tutorias">
+              Todavía no hay tutorías guardadas con esos filtros.
+            </p>
+          </div>
+
         </section>
 
 
@@ -310,7 +347,10 @@
           ✕
         </button>
 
-        <EnviarTutoria :estudiantes="estudiantesFiltrados" />
+        <EnviarTutoria
+          :estudiantes="estudiantesFiltrados"
+          @guardar="guardarTutoria"
+        />
 
       </div>
 
@@ -463,6 +503,7 @@
 import ListasDeEstudiantes from "./ListasDeEstudiantes.vue";
 import ESTUDIANTES from "../data/estudiantes";
 import EnviarTutoria from "./EnviarTutoria.vue";
+import { crearTutoria, listarTutorias } from "../services/tutorias";
 
 export default {
 
@@ -486,6 +527,11 @@ export default {
       mostrarPerfil: false,
       mostrarEditorPerfil: false,
       mostrarSidebar: true,
+
+      tutorias: [],
+      cargandoTutorias: false,
+      errorTutorias: "",
+      origenTutorias: "local",
 
       perfil: {
         nombre: "",
@@ -518,7 +564,7 @@ export default {
     };
   },
 
-  created() {
+  async created() {
     const usuarioGuardado = JSON.parse(
       localStorage.getItem("usuarioActual") || "null"
     );
@@ -534,6 +580,8 @@ export default {
         foto: usuarioGuardado.foto || ""
       };
     }
+
+    await this.cargarTutorias();
   },
 
   computed: {
@@ -552,6 +600,24 @@ export default {
         .map(texto => texto.charAt(0).toUpperCase());
 
       return letras.join("").slice(0, 2) || "P";
+    },
+
+    tutoriasFiltradas() {
+      const normalizar = valor =>
+        String(valor || "").trim().toLowerCase();
+
+      return this.tutorias.filter(tutoria => {
+        const cursoCorrecto =
+          this.cursoSeleccionado === "todos" ||
+          normalizar(tutoria.curso) === normalizar(this.cursoSeleccionado);
+
+        const materiaCorrecta =
+          this.materiaSeleccionada === "todas" ||
+          normalizar(tutoria.materia || tutoria.subject) ===
+          normalizar(this.materiaSeleccionada);
+
+        return cursoCorrecto && materiaCorrecta;
+      });
     },
 
     estudiantesFiltrados() {
@@ -586,6 +652,42 @@ export default {
       this.vista = "calendario";
       this.materiaSeleccionada = "todas";
       this.cursoSeleccionado = "todos";
+    },
+
+    async cargarTutorias() {
+      this.cargandoTutorias = true;
+      this.errorTutorias = "";
+
+      try {
+        const resultado = await listarTutorias();
+        this.tutorias = resultado.data;
+        this.origenTutorias = resultado.origen;
+        if (resultado.error) {
+          throw resultado.error;
+        }
+      } catch (error) {
+        this.errorTutorias =
+          "No se pudieron cargar las tutorías. Revisá la conexión.";
+        console.error(error);
+      } finally {
+        this.cargandoTutorias = false;
+      }
+    },
+
+    async guardarTutoria(tutoria) {
+      this.errorTutorias = "";
+
+      const resultado = await crearTutoria(tutoria);
+
+      if (resultado.error) {
+        this.errorTutorias = "No se pudo guardar la tutoría.";
+        return;
+      }
+
+      this.tutorias.push(resultado.data);
+      this.origenTutorias = resultado.origen;
+      this.mostrarEnviar = false;
+      alert("Tutoría guardada correctamente.");
     },
 
     abrirEditorPerfil() {
@@ -1213,6 +1315,97 @@ export default {
 
 .zona-estudiantes {
   margin-top: 35px;
+}
+
+.estado-tutorias {
+  margin-top: 25px;
+  padding: 20px;
+  border: 1px solid #dfe5f0;
+  border-radius: 12px;
+  background: white;
+}
+
+.estado-tutorias-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.estado-tutorias h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.estado-tutorias p {
+  margin: 5px 0 0;
+  color: #777;
+  font-size: 13px;
+}
+
+.error-tutorias {
+  color: #dc2626 !important;
+}
+
+.boton-recargar {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: white;
+  cursor: pointer;
+}
+
+.boton-recargar:disabled {
+  cursor: wait;
+  opacity: .6;
+}
+
+.tutorias-lista {
+  display: flex;
+  flex-direction: column;
+  margin-top: 15px;
+}
+
+.tutoria-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid #eef0f5;
+}
+
+.tutoria-item > div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tutoria-item span {
+  color: #777;
+  font-size: 12px;
+}
+
+.tutoria-dia {
+  width: 66px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #eef2ff;
+  color: #4338ca;
+  text-align: center;
+}
+
+.tutoria-dia strong,
+.tutoria-dia small {
+  display: block;
+}
+
+.tutoria-dia small {
+  margin-top: 3px;
+  font-size: 12px;
+}
+
+.sin-tutorias {
+  padding: 20px 0 0;
 }
 
 .titulo-seccion {
