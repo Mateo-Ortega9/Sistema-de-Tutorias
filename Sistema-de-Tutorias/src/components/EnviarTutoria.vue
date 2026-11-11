@@ -27,7 +27,6 @@
         v-if="seleccionado === estudiante.id"
         class="acciones"
       >
-
         <a
           :href="'mailto:' + estudiante.email"
           @click.stop
@@ -43,6 +42,31 @@
           💬 WhatsApp
         </a>
 
+        <div class="agenda-fields" @click.stop>
+          <label>
+            Día
+            <select v-model="dia">
+              <option value="LUN">Lunes</option>
+              <option value="MAR">Martes</option>
+              <option value="MIÉ">Miércoles</option>
+              <option value="JUE">Jueves</option>
+              <option value="VIE">Viernes</option>
+            </select>
+          </label>
+
+          <label>
+            Horario
+            <input v-model="horario" type="time" />
+          </label>
+
+          <button
+            type="button"
+            class="guardar-tutoria"
+            @click="guardarTutoria(estudiante)"
+          >
+            Guardar tutoría
+          </button>
+        </div>
       </div>
 
     </div>
@@ -72,7 +96,9 @@ export default {
   data() {
 
     return {
-      seleccionado: null
+      seleccionado: null,
+      dia: "LUN",
+      horario: ""
     }
 
   },
@@ -85,16 +111,35 @@ export default {
 
   },
 
+  emits: ["guardar"],
+
   methods: {
 
     seleccionar(id) {
-
       if (this.seleccionado === id) {
         this.seleccionado = null;
       } else {
         this.seleccionado = id;
+        this.dia = "LUN";
+        this.horario = "";
+      }
+    },
+
+    guardarTutoria(estudiante) {
+      if (!this.horario) {
+        alert("Elegí un horario para la tutoría.");
+        return;
       }
 
+      this.$emit("guardar", {
+        materia: estudiante.materia,
+        curso: estudiante.curso,
+        dia: this.dia,
+        horario: this.horario,
+        estudiante: estudiante.nombre,
+        email: estudiante.email,
+        whatsapp: estudiante.whatsapp
+      });
     }
 
   }
@@ -164,6 +209,44 @@ export default {
   text-decoration: none;
   color: #222;
   background: white;
+}
+
+.agenda-fields {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.agenda-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: #666;
+  font-size: 11px;
+}
+
+.agenda-fields select,
+.agenda-fields input {
+  padding: 7px;
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  background: white;
+}
+
+.guardar-tutoria {
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 5px;
+  background: #4f46e5;
+  color: white;
+  cursor: pointer;
+}
+
+.guardar-tutoria:hover {
+  background: #3730a3;
 }
 
 .vacio {
