@@ -70,7 +70,7 @@ El administrador puede:
 - Diseño responsive para computadora y celular.
 - Cierre de sesión.
 
-> En esta etapa los datos se guardan en el almacenamiento local del navegador mediante `localStorage`. No se utiliza todavía una base de datos real ni un servidor backend.
+> La aplicación tiene un modo local para poder probarla sin credenciales. Cuando se configuran las variables de Supabase, las tutorías se guardan y consultan desde PostgreSQL mediante la API de Supabase.
 
 ## Tecnologías utilizadas
 
@@ -82,9 +82,11 @@ El administrador puede:
 - **CSS3**
 - **Node.js**
 - **npm**
-- **localStorage** para persistencia local
+- **localStorage** como modo local de desarrollo
+- **Supabase y PostgreSQL** para persistencia remota de tutorías
 - **Git y GitHub** para control de versiones y colaboración
-- **chat gpt work** version luna 5.6 (medio) usado para mejorar codigo y solucionar problemas 
+- **ChatGPT / Codex** con modelo Luna 5.6 como asistente de desarrollo
+- **@supabase/supabase-js** para conectar Vue con Supabase 
 ## Herramientas de trabajo
 
 - Visual Studio Code.
@@ -131,13 +133,24 @@ cd Sistema-de-Tutorias/Sistema-de-Tutorias
 npm install
 ```
 
-4. Iniciar el servidor de desarrollo:
+4. Configurar Supabase de forma opcional:
+
+- Crear un proyecto en Supabase.
+- Abrir `supabase/schema.sql` en el SQL Editor de Supabase y ejecutarlo.
+- Copiar `.env.example` como `.env.local`.
+- Completar `VITE_SUPABASE_URL`.
+- Completar `VITE_SUPABASE_PUBLISHABLE_KEY`.
+- Reiniciar Vite después de modificar las variables.
+
+Si no se configuran estas variables, la aplicación funciona en modo local con `localStorage`.
+
+5. Iniciar el servidor de desarrollo:
 
 ```bash
 npm run dev
 ```
 
-5. Abrir en el navegador la dirección que muestra Vite. Generalmente es:
+6. Abrir en el navegador la dirección que muestra Vite. Generalmente es:
 
 ```text
 http://localhost:5173
@@ -228,8 +241,8 @@ npm run preview
 
 El proyecto continúa en desarrollo. Algunas mejoras previstas son:
 
-- Conectar una base de datos real.
-- Crear un backend para usuarios y tutorías.
+- Mejorar la autenticación con Supabase Auth.
+- Crear reglas más avanzadas para usuarios y tutorías.
 - Proteger las contraseñas de manera segura.
 - Agregar permisos más avanzados.
 - Permitir editar y administrar estudiantes.
