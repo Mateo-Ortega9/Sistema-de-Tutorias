@@ -554,7 +554,8 @@
   </div>
 </template>
 
-<script setup>\nimport { cerrarSesion as cerrarSesionSupabase } from "../services/auth";
+<script setup>
+import { cerrarSesion as cerrarSesionSupabase } from "../services/auth";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import ESTUDIANTES from "../data/estudiantes";
