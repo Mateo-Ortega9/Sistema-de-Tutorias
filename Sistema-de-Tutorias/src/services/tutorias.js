@@ -45,9 +45,14 @@ export async function crearTutoria(tutoria) {
     };
   }
 
+  const { data: usuarioActual } = await supabase.auth.getUser();
+  const payload = usuarioActual.user
+    ? { ...tutoria, creador_id: usuarioActual.user.id }
+    : tutoria;
+
   const { data, error } = await supabase
     .from("tutorias")
-    .insert(tutoria)
+    .insert(payload)
     .select()
     .single();
 
