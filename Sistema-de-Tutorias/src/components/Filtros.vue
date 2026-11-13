@@ -504,6 +504,8 @@ import ListasDeEstudiantes from "./ListasDeEstudiantes.vue";
 import ESTUDIANTES from "../data/estudiantes";
 import EnviarTutoria from "./EnviarTutoria.vue";
 import { crearTutoria, listarTutorias } from "../services/tutorias";
+import { supabaseConfigurado } from "../lib/supabase";
+import { cerrarSesion as cerrarSesionSupabase, guardarPerfil as guardarPerfilSupabase, obtenerPerfilActual } from "../services/auth";
 
 export default {
 
@@ -579,6 +581,17 @@ export default {
         descripcion: usuarioGuardado.descripcion || "",
         foto: usuarioGuardado.foto || ""
       };
+    }
+
+    if (supabaseConfigurado) {
+      try {
+        const perfilSupabase = await obtenerPerfilActual();
+        if (perfilSupabase) {
+          this.perfil = { ...this.perfil, ...perfilSupabase };
+        }
+      } catch (error) {
+        console.error("No se pudo cargar el perfil:", error);
+      }
     }
 
     await this.cargarTutorias();
@@ -717,7 +730,7 @@ export default {
       lector.readAsDataURL(archivo);
     },
 
-    guardarPerfil() {
+    async guardarPerfil() {
       const nombre = this.perfil.nombre.trim();
       const apellido = this.perfil.apellido.trim();
 
@@ -725,18 +738,6 @@ export default {
         alert("Completá tu nombre y apellido.");
         return;
       }
-
-      const usuarios = JSON.parse(
-        localStorage.getItem("usuariosPROA") || "[]"
-      );
-      const usuarioActual = JSON.parse(
-        localStorage.getItem("usuarioActual") || "null"
-      );
-
-      const usuario = usuarios.find(item =>
-        (usuarioActual?.id && item.id === usuarioActual.id) ||
-        item.email === this.perfil.email
-      );
 
       const datosPerfil = {
         nombre,
@@ -746,29 +747,53 @@ export default {
         foto: this.perfil.foto
       };
 
-      if (usuario) {
-        Object.assign(usuario, datosPerfil);
-        localStorage.setItem("usuariosPROA", JSON.stringify(usuarios));
-        localStorage.setItem(
-          "usuarioActual",
-          JSON.stringify({ ...usuarioActual, ...usuario })
-        );
-      } else if (usuarioActual) {
-        localStorage.setItem(
-          "usuarioActual",
-          JSON.stringify({ ...usuarioActual, ...datosPerfil })
-        );
-      }
+      try {
+        if (supabaseConfigurado) {
+          const perfilGuardado = await guardarPerfilSupabase(datosPerfil);
+          this.perfil = { ...this.perfil, ...perfilGuardado };
+        } else {
+          const usuarios = JSON.parse(
+            localStorage.getItem("usuariosPROA") || "[]"
+          );
+          const usuarioActual = JSON.parse(
+            localStorage.getItem("usuarioActual") || "null"
+          );
+          const usuario = usuarios.find(item =>
+            (usuarioActual?.id && item.id === usuarioActual.id) ||
+            item.email === this.perfil.email
+          );
 
-      this.perfil = {
-        ...this.perfil,
-        ...datosPerfil
-      };
-      this.mostrarEditorPerfil = false;
-      alert("Perfil actualizado correctamente.");
+          if (usuario) {
+            Object.assign(usuario, datosPerfil);
+            localStorage.setItem("usuariosPROA", JSON.stringify(usuarios));
+            localStorage.setItem(
+              "usuarioActual",
+              JSON.stringify({ ...usuarioActual, ...usuario })
+            );
+          } else if (usuarioActual) {
+            localStorage.setItem(
+              "usuarioActual",
+              JSON.stringify({ ...usuarioActual, ...datosPerfil })
+            );
+          }
+
+          this.perfil = { ...this.perfil, ...datosPerfil };
+        }
+
+        this.mostrarEditorPerfil = false;
+        alert("Perfil actualizado correctamente.");
+      } catch (error) {
+        console.error(error);
+        alert(error.message || "No se pudo guardar el perfil.");
+      }
     },
 
-    cerrarSesion() {
+    async cerrarSesion() {
+      try {
+        await cerrarSesionSupabase();
+      } catch (error) {
+        console.error("No se pudo cerrar la sesión de Supabase:", error);
+      }
       localStorage.removeItem("usuarioActual");
       this.$router.push("/login");
     },
