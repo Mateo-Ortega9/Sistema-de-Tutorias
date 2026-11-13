@@ -113,7 +113,7 @@ const formulario = reactive({
   password: ""
 });
 
-const iniciarSesionFormulario = async () => {
+const iniciarSesion = async () => {
   if (!formulario.rol) {
     alert("Seleccioná si sos Profesor o Administración.");
     return;
