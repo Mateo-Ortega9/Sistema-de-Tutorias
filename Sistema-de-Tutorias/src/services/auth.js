@@ -24,7 +24,26 @@ export const obtenerPerfilActual = async (usuario = null) => {
     .maybeSingle();
 
   if (error) throw error;
-  return data;
+
+  if (data) return data;
+
+  const metadata = actual.user_metadata || {};
+  const perfilInicial = {
+    id: actual.id,
+    email: actual.email || "",
+    nombre: metadata.nombre || "",
+    apellido: metadata.apellido || "",
+    rol: normalizarRol(metadata.rol) || "profesor"
+  };
+
+  const { data: perfilCreado, error: errorCreacion } = await supabase
+    .from("perfiles")
+    .upsert(perfilInicial, { onConflict: "id" })
+    .select()
+    .single();
+
+  if (errorCreacion) throw errorCreacion;
+  return perfilCreado;
 };
 
 export const registrarUsuario = async ({ nombre, apellido, email, password, rol }) => {
