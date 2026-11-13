@@ -554,7 +554,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup>\nimport { cerrarSesion as cerrarSesionSupabase } from "../services/auth";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import ESTUDIANTES from "../data/estudiantes";
@@ -831,7 +831,12 @@ const irAProfesor = () => {
   router.push("/filtros");
 };
 
-const cerrarSesion = () => {
+const cerrarSesion = async () => {
+  try {
+    await cerrarSesionSupabase();
+  } catch (error) {
+    console.error("No se pudo cerrar la sesión de Supabase:", error);
+  }
   localStorage.removeItem("usuarioActual");
   router.push("/login");
 };
