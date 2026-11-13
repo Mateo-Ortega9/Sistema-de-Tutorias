@@ -103,7 +103,7 @@
 import { reactive } from "vue";
 import { useRouter } from "vue-router";
 import { supabaseConfigurado } from "../lib/supabase";
-import { iniciarSesion } from "../services/auth";
+import { iniciarSesion as iniciarSesionSupabase } from "../services/auth";
 
 const router = useRouter();
 
@@ -128,7 +128,7 @@ const iniciarSesion = async () => {
 
   try {
     if (supabaseConfigurado) {
-      const resultado = await iniciarSesion({
+      const resultado = await iniciarSesionSupabase({
         email,
         password: formulario.password,
         rol: formulario.rol
