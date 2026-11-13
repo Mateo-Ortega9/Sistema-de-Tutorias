@@ -774,12 +774,15 @@ export default {
     },
 
     colorCelda(semana, dia) {
+      const cantidad = this.tutorias.filter(tutoria =>
+        String(tutoria.dia || "").toUpperCase() === dia
+      ).length;
 
-      if (semana === 1 && dia === "LUN") {
+      if (cantidad >= 3) {
         return "naranja";
       }
 
-      if (semana === 2 && dia === "VIE") {
+      if (cantidad >= 1) {
         return "azul";
       }
 
@@ -788,7 +791,6 @@ export default {
       }
 
       return "";
-
     }
 
   }
