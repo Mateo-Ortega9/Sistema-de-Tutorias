@@ -86,127 +86,81 @@
 
 
 <script setup>
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import { supabaseConfigurado } from "../lib/supabase";
+import {
+  actualizarPassword,
+  obtenerSesionActual,
+  solicitarRecuperacion
+} from "../services/auth";
 
-import { ref } from 'vue'
+const router = useRouter();
+const email = ref("");
+const tipo = ref("");
 
-import { useRouter } from 'vue-router'
-
-
-const router = useRouter()
-
-
-const email = ref('')
-
-const tipo = ref('')
-
-
-const recuperar = () => {
-
-  const correo = email.value
-    .trim()
-    .toLowerCase()
-
-
-  // Verificar correo
-  if (!correo.endsWith('@escuelasproa.edu.ar')) {
-
-    alert(
-      'Debés utilizar un correo institucional de Escuelas PROA.'
-    )
-
-    return
+onMounted(async () => {
+  if (!supabaseConfigurado || !window.location.hash.includes("type=recovery")) {
+    return;
   }
 
+  try {
+    const session = await obtenerSesionActual();
 
-  // Verificar tipo
+    if (!session) {
+      alert("El enlace de recuperación venció o no es válido.");
+      return;
+    }
+
+    const nuevaPassword = window.prompt("Ingresá tu nueva contraseña:");
+
+    if (nuevaPassword === null) {
+      return;
+    }
+
+    if (nuevaPassword.length < 6) {
+      alert("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+
+    await actualizarPassword(nuevaPassword);
+    alert("¡Contraseña cambiada correctamente!");
+    window.location.hash = "";
+    router.push("/login");
+  } catch (error) {
+    console.error(error);
+    alert(error.message || "No se pudo cambiar la contraseña.");
+  }
+});
+
+const recuperar = async () => {
+  const correo = email.value.trim().toLowerCase();
+
+  if (!correo.endsWith("@escuelasproa.edu.ar")) {
+    alert("Debés utilizar un correo institucional de Escuelas PROA.");
+    return;
+  }
+
   if (!tipo.value) {
-
-    alert(
-      'Seleccioná Profesor o Administración.'
-    )
-
-    return
+    alert("Seleccioná Profesor o Administración.");
+    return;
   }
 
-
-  // Obtener usuarios
-  const usuarios = JSON.parse(
-    localStorage.getItem('usuariosPROA') || '[]'
-  )
-
-
-  // Buscar usuario
-  const usuario = usuarios.find(usuario => {
-    const rolUsuario = String(usuario.rol || usuario.tipo || '')
-      .trim()
-      .toLowerCase()
-
-    return String(usuario.email || '').trim().toLowerCase() === correo &&
-      rolUsuario === tipo.value
-  })
-
-
-  if (!usuario) {
-
-    alert(
-      'No encontramos una cuenta con ese correo y tipo de usuario.'
-    )
-
-    return
-
+  if (!supabaseConfigurado) {
+    alert("Supabase todavía no está configurado.");
+    return;
   }
 
-
-  // Pedir nueva contraseña
-  const nuevaPassword = prompt(
-    'Ingresá tu nueva contraseña:'
-  )
-
-
-  if (nuevaPassword === null) {
-
-    return
-
+  try {
+    await solicitarRecuperacion(correo);
+    alert("Te enviamos un enlace para recuperar la contraseña. Revisá tu correo.");
+  } catch (error) {
+    console.error(error);
+    alert(error.message || "No se pudo enviar el correo de recuperación.");
   }
+};
 
-
-  if (nuevaPassword.length < 6) {
-
-    alert(
-      'La contraseña debe tener al menos 6 caracteres.'
-    )
-
-    return
-
-  }
-
-
-  // Actualizar contraseña
-  usuario.password = nuevaPassword
-
-
-  // Guardar cambios
-  localStorage.setItem(
-    'usuariosPROA',
-    JSON.stringify(usuarios)
-  )
-
-
-  alert(
-    '¡Contraseña cambiada correctamente!'
-  )
-
-
-  router.push('/login')
-
-}
-
-
-const volver = () => {
-
-  router.push('/login')
-
-}
+const volver = () => router.push("/login");
 
 </script>
 
