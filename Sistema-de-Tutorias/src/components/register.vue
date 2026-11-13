@@ -152,124 +152,98 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { reactive } from "vue";
+import { useRouter } from "vue-router";
+import { supabaseConfigurado } from "../lib/supabase";
+import { registrarUsuario } from "../services/auth";
 
-const router = useRouter()
+const router = useRouter();
 
 const formulario = reactive({
-  nombre: '',
-  apellido: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-  tipo: ''
-})
+  nombre: "",
+  apellido: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  tipo: ""
+});
 
-const registrarse = () => {
+const registrarse = async () => {
+  const nombre = formulario.nombre.trim();
+  const apellido = formulario.apellido.trim();
+  const email = formulario.email.trim().toLowerCase();
+  const password = formulario.password;
+  const tipo = formulario.tipo;
 
-  // Limpiar datos
-  const nombre = formulario.nombre.trim()
-  const apellido = formulario.apellido.trim()
-  const email = formulario.email.trim().toLowerCase()
-  const password = formulario.password
-  const confirmPassword = formulario.confirmPassword
-  const tipo = formulario.tipo
-
-  // Verificar nombre
-  if (!nombre) {
-    alert('Ingresá tu nombre.')
-    return
+  if (!nombre || !apellido) {
+    alert("Ingresá tu nombre y apellido.");
+    return;
   }
 
-  // Verificar apellido
-  if (!apellido) {
-    alert('Ingresá tu apellido.')
-    return
+  if (!email.endsWith("@escuelasproa.edu.ar")) {
+    alert("Debés utilizar un correo institucional de Escuelas PROA.");
+    return;
   }
 
-  // Verificar correo institucional
-  if (!email.endsWith('@escuelasproa.edu.ar')) {
-    alert(
-      'Debés utilizar un correo institucional de Escuelas PROA.\n\n' +
-      'Ejemplo: alumno@escuelasproa.edu.ar'
-    )
-    return
-  }
-
-  // Verificar contraseña
   if (password.length < 6) {
-    alert(
-      'La contraseña debe tener al menos 6 caracteres.'
-    )
-    return
+    alert("La contraseña debe tener al menos 6 caracteres.");
+    return;
   }
 
-  // Verificar contraseñas
-  if (password !== confirmPassword) {
-    alert(
-      'Las contraseñas no coinciden.'
-    )
-    return
+  if (password !== formulario.confirmPassword) {
+    alert("Las contraseñas no coinciden.");
+    return;
   }
 
-  // Verificar tipo de usuario
   if (!tipo) {
-    alert(
-      'Seleccioná Profesor o Administración.'
-    )
-    return
+    alert("Seleccioná Profesor o Administración.");
+    return;
   }
 
-  // Obtener usuarios guardados
-  const usuarios = JSON.parse(
-    localStorage.getItem('usuariosPROA') || '[]'
-  )
+  try {
+    if (supabaseConfigurado) {
+      const resultado = await registrarUsuario({
+        nombre,
+        apellido,
+        email,
+        password,
+        rol: tipo
+      });
 
-  // Verificar si el correo ya existe
-  const usuarioExiste = usuarios.some(
-    usuario => usuario.email === email
-  )
+      if (!resultado.session) {
+        alert("Cuenta creada. Revisá tu correo para confirmar la cuenta y luego iniciá sesión.");
+      } else {
+        alert("¡Registro exitoso! Ya podés iniciar sesión.");
+      }
+    } else {
+      const usuarios = JSON.parse(localStorage.getItem("usuariosPROA") || "[]");
 
-  if (usuarioExiste) {
-    alert(
-      'Ese correo ya está registrado.'
-    )
-    return
+      if (usuarios.some(usuario => usuario.email === email)) {
+        throw new Error("Ese correo ya está registrado.");
+      }
+
+      usuarios.push({
+        id: Date.now(),
+        nombre,
+        apellido,
+        email,
+        password,
+        tipo
+      });
+
+      localStorage.setItem("usuariosPROA", JSON.stringify(usuarios));
+      alert("¡Registro exitoso! Ahora podés iniciar sesión.");
+    }
+
+    router.push("/login");
+  } catch (error) {
+    console.error(error);
+    alert(error.message || "No se pudo crear la cuenta.");
   }
+};
 
-  // Crear nuevo usuario
-  const nuevoUsuario = {
-    id: Date.now(),
-    nombre: nombre,
-    apellido: apellido,
-    email: email,
-    password: password,
-    tipo: tipo
-  }
+const irAlLogin = () => router.push("/login");
 
-  // Guardar usuario
-  usuarios.push(nuevoUsuario)
-
-  localStorage.setItem(
-    'usuariosPROA',
-    JSON.stringify(usuarios)
-  )
-
-  // Mensaje
-  alert(
-    '¡Registro exitoso! 🎉\n\n' +
-    'Tu cuenta fue creada correctamente.\n\n' +
-    'Ahora podés iniciar sesión.'
-  )
-
-  // Ir al login
-  router.push('/login')
-}
-
-const irAlLogin = () => {
-  router.push('/login')
-}
 </script>
 
 <style scoped>
