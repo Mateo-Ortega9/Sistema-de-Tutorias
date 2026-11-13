@@ -100,89 +100,77 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { reactive } from "vue";
+import { useRouter } from "vue-router";
+import { supabaseConfigurado } from "../lib/supabase";
+import { iniciarSesion } from "../services/auth";
 
-const router = useRouter()
+const router = useRouter();
 
 const formulario = reactive({
-  rol: '',
-  email: '',
-  password: '',
-})
+  rol: "",
+  email: "",
+  password: ""
+});
 
-const iniciarSesion = () => {
-
-  // Verificar tipo de usuario
+const iniciarSesionFormulario = async () => {
   if (!formulario.rol) {
-    alert('Seleccioná si sos Profesor o Administración.')
-    return
+    alert("Seleccioná si sos Profesor o Administración.");
+    return;
   }
 
-  // Limpiar correo
-  const email = formulario.email
-    .toLowerCase()
-    .trim()
+  const email = formulario.email.trim().toLowerCase();
 
-  // Verificar correo institucional
-  if (!email.endsWith('@escuelasproa.edu.ar')) {
-    alert(
-      'Debés utilizar un correo institucional de Escuelas PROA.'
-    )
-    return
+  if (!email.endsWith("@escuelasproa.edu.ar")) {
+    alert("Debés utilizar un correo institucional de Escuelas PROA.");
+    return;
   }
 
-  // Obtener usuarios registrados
-  const usuarios = JSON.parse(
-    localStorage.getItem('usuariosPROA') || '[]'
-  )
+  try {
+    if (supabaseConfigurado) {
+      const resultado = await iniciarSesion({
+        email,
+        password: formulario.password,
+        rol: formulario.rol
+      });
 
-  // Buscar usuario profesor registrado
-  const usuario = usuarios.find(usuario => {
-    const emailUsuario = String(usuario.email || '').trim().toLowerCase()
-    const rolOriginal = String(usuario.rol || usuario.tipo || '').trim().toLowerCase()
-    const rolUsuario = rolOriginal === 'administrador'
-      ? 'administracion'
-      : rolOriginal
+      const usuario = {
+        id: resultado.user.id,
+        nombre: resultado.perfil?.nombre || "",
+        apellido: resultado.perfil?.apellido || "",
+        email: resultado.user.email,
+        rol: resultado.perfil?.rol || formulario.rol
+      };
 
-    return emailUsuario === email &&
-      usuario.password === formulario.password &&
-      rolUsuario === formulario.rol
-  })
+      localStorage.setItem("usuarioActual", JSON.stringify(usuario));
+    } else {
+      const usuarios = JSON.parse(localStorage.getItem("usuariosPROA") || "[]");
+      const usuario = usuarios.find(item => {
+        const rol = String(item.rol || item.tipo || "").trim().toLowerCase();
+        return String(item.email || "").trim().toLowerCase() === email &&
+          item.password === formulario.password &&
+          (rol === "administrador" ? "administracion" : rol) === formulario.rol;
+      });
 
-  // Usuario inexistente
-  if (!usuario) {
-    alert('Correo, contraseña o tipo de usuario incorrectos.')
-    return
+      if (!usuario) {
+        throw new Error("Correo, contraseña o tipo de usuario incorrectos.");
+      }
+
+      localStorage.setItem("usuarioActual", JSON.stringify(usuario));
+    }
+
+    alert("¡Inicio de sesión correcto!");
+
+    router.push(formulario.rol === "profesor" ? "/filtros" : "/admin");
+  } catch (error) {
+    console.error(error);
+    alert(error.message || "No se pudo iniciar sesión.");
   }
+};
 
-  // Guardar usuario actual
-  localStorage.setItem(
-    'usuarioActual',
-    JSON.stringify(usuario)
-  )
+const irAlRegistro = () => router.push("/register");
+const irRecuperar = () => router.push("/recuperar");
 
-  alert(`¡Bienvenido/a ${usuario.nombre}!`)
-
-  console.log('Usuario conectado:', usuario)
-
-  // Ir al inicio
-  if (formulario.rol === 'profesor') {
-    router.push('/filtros')
-  } else {
-    router.push('/admin')
-  }
-}
-
-// Ir al registro
-const irAlRegistro = () => {
-  router.push('/register')
-}
-
-// Recuperar contraseña
-const irRecuperar = () => {
-  router.push('/recuperar')
-}
 </script>
 
 <style scoped>
